@@ -21,7 +21,8 @@
  */
 #pragma once
 
-//TODO implement voltage scaling (calibrated Vrefint) and ADC resolution scaling (if applicable)
+// Using STM32 internal temp sensor (TEMP_SENSOR_BOARD -1000) requires TEMP_BOARD_PIN ATEMP.
+#define TEMP_BOARD_PIN ATEMP
 
 #if defined(STM32F0xx)
     /*
@@ -252,6 +253,14 @@
     #define TS_CAL2_REGOFFSET 0x1FFF75CA 
 #endif
 
+//TODO implement voltage scaling (calibrated Vrefint) and ADC resolution scaling (when applicable)
+
+/**
+ * When provided in datasheet, the use of calibrated values (TS_CAL1, TS_CAL2) should always be prerred over typical values.
+ * Typical values may result in important variation from the actual temperature.
+ * 
+ * If calibrated values are not provided in datasheet, it is encouraged to calibrate your specific chip yourself. 
+ */
 #if defined(TS_CAL1_TEMP) && defined(TS_CAL1_REGOFFSET) && defined(TS_CAL2_TEMP) && defined(TS_CAL2_REGOFFSET)
 
     #define READMEMORY(ADDR) (*((uint16_t const *)(ADDR)))
