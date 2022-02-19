@@ -247,18 +247,6 @@
   #ifndef TEMP_BOARD_PIN
     #define TEMP_BOARD_PIN ATEMP      // Board temp sensor pin, if not set in pins file.
   #endif
-  #if TEMP_SENSOR_BOARD == -1000
-    //#define TEMP_SENSOR_BOARD_INTERNAL_CAL_VREF 3.3 //TODO
-
-    #define TEMP_SENSOR_BOARD_INTERNAL_TYPICAL_VOLT 1.43
-    #define TEMP_SENSOR_BOARD_INTERNAL_TYPICAL_TEMP 25
-    #define TEMP_SENSOR_BOARD_INTERNAL_TYPICAL_SLOPE 4.3
-
-    // #define TEMP_SENSOR_BOARD_INTERNAL_CAL1_TEMP 30         //Calibration temperature of TS_CAL1 (see specific SoC datasheet)
-    // #define TEMP_SENSOR_BOARD_INTERNAL_CAL1_ADDR 0xFFFFF7B8 //Example address of TS_CAL1 for STM32F030x4/x6/x8/xC (see specific SoC datasheet)
-    // #define TEMP_SENSOR_BOARD_INTERNAL_CAL2_TEMP 110        //Calibration temperature of TS_CAL2 (see datasheet) (see specific SoC datasheet)
-    // #define TEMP_SENSOR_BOARD_INTERNAL_CAL2_ADDR 0xFFFFF7C2 //Example address of TS_CAL1 for STM32F030x4/x6/x8/xC (see specific SoC datasheet)
-  #endif
 #endif
 
 //
