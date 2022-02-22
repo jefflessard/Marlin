@@ -1179,6 +1179,7 @@ private:
   #endif
 
   #if BOTH(HAS_SPI_FLASH, SDSUPPORT)
+    static void M992();
     static void M993();
     static void M994();
   #endif
