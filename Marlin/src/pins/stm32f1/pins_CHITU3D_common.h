@@ -116,10 +116,11 @@
 // SPI Flash
 #define HAS_SPI_FLASH                          1
 #if HAS_SPI_FLASH
-  #define SPI_FLASH_SIZE                0x200000  // 2MB
+  #define SPI_FLASH_SIZE               0x1000000  // 16MB
 #endif
 
 // SPI 2
+#define SPI_DEVICE                             2
 #define SPI_FLASH_CS_PIN                    PB12
 #define SPI_FLASH_MOSI_PIN                  PB15
 #define SPI_FLASH_MISO_PIN                  PB14
@@ -133,6 +134,7 @@
   #define TOUCH_SCK_PIN                     PA5   // SPI1_SCK
   #define TOUCH_MISO_PIN                    PA6   // SPI1_MISO
   #define TOUCH_MOSI_PIN                    PA7   // SPI1_MOSI
+  #define TOUCH_INT_PIN                     PB6   // 7846-INT
 
   #define TFT_RESET_PIN                     PF11
   #define TFT_BACKLIGHT_PIN                 PD13
@@ -149,29 +151,29 @@
 
 #if HAS_TFT_LVGL_UI
   // LVGL
-  #define HAS_SPI_FLASH_FONT                   1
-  #define HAS_GCODE_PREVIEW                    1
-  #define HAS_GCODE_DEFAULT_VIEW_IN_FLASH      0
-  #define HAS_LANG_SELECT_SCREEN               1
-  #define HAS_BAK_VIEW_IN_FLASH                0
-  #define HAS_LOGO_IN_FLASH                    0
+  // #define HAS_SPI_FLASH_FONT                   1
+  // #define HAS_GCODE_PREVIEW                    1
+  // #define HAS_GCODE_DEFAULT_VIEW_IN_FLASH      0
+  // #define HAS_LANG_SELECT_SCREEN               1
+  // #define HAS_BAK_VIEW_IN_FLASH                0
+  // #define HAS_LOGO_IN_FLASH                    0
 #elif ENABLED(TFT_COLOR_UI)
   // Color UI
   #define TFT_BUFFER_SIZE                  14400
 #endif
 
-// SPI1(PA7)=LCD & SPI3(PB5)=STUFF, are not available
+// SPI1(PA7)=LCD & SPI2(PB14)=FLASH & SPI3(PB5)=E1, are not available
 // so SPI2 is required.
-#define SPI_DEVICE                             2
-#define SD_SCK_PIN                          PB13
-#define SD_MISO_PIN                         PB14
-#define SD_MOSI_PIN                         PB15
-#define SD_SS_PIN                           PB12
+// #define SPI_DEVICE                             2
+// #define SD_SCK_PIN                          PB13
+// #define SD_MISO_PIN                         PB14
+// #define SD_MOSI_PIN                         PB15
+// #define SD_SS_PIN                           PB12
 
 //
 // SD Card
 //
 #define SDIO_SUPPORT
-#define SD_DETECT_PIN                       -1    // PF0, but it isn't connected
+#define SD_DETECT_PIN                        PF0   // PF0, but it isn't connected
 #define SDIO_CLOCK                       4500000
 #define SDIO_READ_RETRIES                     16
