@@ -26,149 +26,154 @@
 
 #include "MarlinSPI.h"
 
-static void spi_init(spi_t *obj, uint32_t speed, spi_mode_e mode, uint8_t msb, uint32_t dataSize) {
-  spi_init(obj, speed, mode, msb);
-  // spi_init set 8bit always
-  // TODO: copy the code from spi_init and handle data size, to avoid double init always!!
-  if (dataSize != SPI_DATASIZE_8BIT) {
-    obj->handle.Init.DataSize = dataSize;
-    HAL_SPI_Init(&obj->handle);
-    __HAL_SPI_ENABLE(&obj->handle);
-  }
-}
-
 void MarlinSPI::setClockDivider(uint8_t _div) {
+  //TODO unused variables, maybe set _spi.handle.Init.BaudRatePrescaler instead
   _speed = spi_getClkFreq(&_spi);// / _div;
-  _clockDivider = _div;
+  _clockDivider = _div; 
 }
 
 void MarlinSPI::begin(void) {
   //TODO: only call spi_init if any parameter changed!!
-  spi_init(&_spi, _speed, _dataMode, _bitOrder, _dataSize);
-}
+  spi_init(&_spi, _speed, _dataMode, _bitOrder);
 
-void MarlinSPI::setupDma(SPI_HandleTypeDef &_spiHandle, DMA_HandleTypeDef &_dmaHandle, uint32_t direction, bool minc) {
-  _dmaHandle.Init.Direction = direction;
-  _dmaHandle.Init.PeriphInc = DMA_PINC_DISABLE;
-  _dmaHandle.Init.Mode = DMA_NORMAL;
-  _dmaHandle.Init.Priority = DMA_PRIORITY_LOW;
-  _dmaHandle.Init.MemInc = minc ? DMA_MINC_ENABLE : DMA_MINC_DISABLE;
+  // spi_init set 8bit always
+  // TODO: copy the code from spi_init and handle data size, to avoid double init always!!
+  if (_dataSize != SPI_DATASIZE_8BIT) {
+    _spi.handle.Init.DataSize = _dataSize;
+  }
 
-  if (_dataSize == DATA_SIZE_8BIT) {
-    _dmaHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    _dmaHandle.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-  }
-  else {
-    _dmaHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    _dmaHandle.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-  }
+   //Configure Rx&Tx DMAs
+  _dmaRx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+  _dmaRx.Init.PeriphInc = DMA_PINC_DISABLE;
+  _dmaRx.Init.MemInc = DMA_MINC_ENABLE; //TODO minc ? DMA_MINC_ENABLE : DMA_MINC_DISABLE;
+  _dmaRx.Init.PeriphDataAlignment = _spi.handle.Init.DataSize == SPI_DATASIZE_8BIT ? DMA_PDATAALIGN_BYTE : DMA_PDATAALIGN_HALFWORD;
+  _dmaRx.Init.MemDataAlignment = _spi.handle.Init.DataSize == SPI_DATASIZE_8BIT ? DMA_PDATAALIGN_BYTE : DMA_PDATAALIGN_HALFWORD;
+  _dmaRx.Init.Mode = DMA_NORMAL;
+  _dmaRx.Init.Priority = DMA_PRIORITY_LOW;
+
+  _dmaTx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+  _dmaTx.Init.PeriphInc = DMA_PINC_DISABLE;
+  _dmaTx.Init.MemInc = DMA_MINC_ENABLE; //TODO minc ? DMA_MINC_ENABLE : DMA_MINC_DISABLE;
+  _dmaTx.Init.PeriphDataAlignment = _spi.handle.Init.DataSize == SPI_DATASIZE_8BIT ? DMA_PDATAALIGN_BYTE : DMA_PDATAALIGN_HALFWORD;
+  _dmaTx.Init.MemDataAlignment = _spi.handle.Init.DataSize == SPI_DATASIZE_8BIT ? DMA_PDATAALIGN_BYTE : DMA_PDATAALIGN_HALFWORD;
+  _dmaTx.Init.Mode = DMA_NORMAL;
+  _dmaTx.Init.Priority = DMA_PRIORITY_LOW;
+
   #ifdef STM32F4xx
-    _dmaHandle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    _dmaRx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    _dmaTx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
   #endif
 
-  // start DMA hardware
-  // TODO: check if hardware is already enabled
   #ifdef SPI1_BASE
-    if (_spiHandle.Instance == SPI1) {
-      #ifdef STM32F1xx
-        __HAL_RCC_DMA1_CLK_ENABLE();
-        _dmaHandle.Instance = (direction == DMA_MEMORY_TO_PERIPH) ? DMA1_Channel3 : DMA1_Channel2;
-      #elif defined(STM32F4xx)
-        __HAL_RCC_DMA2_CLK_ENABLE();
-        _dmaHandle.Init.Channel = DMA_CHANNEL_3;
-        _dmaHandle.Instance = (direction == DMA_MEMORY_TO_PERIPH) ? DMA2_Stream3 : DMA2_Stream0;
+    if(_spi.handle.Instance==SPI1){
+      SPI1_DMA_CLK_ENABLE();
+      _dmaRx.Instance = SPI1_DMA_RX;
+      _dmaTx.Instance = SPI1_DMA_TX;
+      #ifdef STM32F4xx
+        _dmaRx.Init.Channel = DMA_CHANNEL_3;
+        _dmaTx.Init.Channel = DMA_CHANNEL_3;
       #endif
     }
   #endif
   #ifdef SPI2_BASE
-    if (_spiHandle.Instance == SPI2) {
-      #ifdef STM32F1xx
-        __HAL_RCC_DMA1_CLK_ENABLE();
-        _dmaHandle.Instance = (direction == DMA_MEMORY_TO_PERIPH) ? DMA1_Channel5 : DMA1_Channel4;
-      #elif defined(STM32F4xx)
-        __HAL_RCC_DMA1_CLK_ENABLE();
-        _dmaHandle.Init.Channel = DMA_CHANNEL_0;
-        _dmaHandle.Instance = (direction == DMA_MEMORY_TO_PERIPH) ? DMA1_Stream4 : DMA1_Stream3;
+    if(_spi.handle.Instance==SPI2){
+      SPI2_DMA_CLK_ENABLE();
+      _dmaRx.Instance = SPI2_DMA_RX;
+      _dmaTx.Instance = SPI2_DMA_TX;
+      #ifdef STM32F4xx
+        _dmaRx.Init.Channel = DMA_CHANNEL_0;
+        _dmaTx.Init.Channel = DMA_CHANNEL_0;
       #endif
     }
   #endif
   #ifdef SPI3_BASE
-    if (_spiHandle.Instance == SPI3) {
-      #ifdef STM32F1xx
-        __HAL_RCC_DMA2_CLK_ENABLE();
-        _dmaHandle.Instance = (direction == DMA_MEMORY_TO_PERIPH) ? DMA2_Channel2 : DMA2_Channel1;
-      #elif defined(STM32F4xx)
-        __HAL_RCC_DMA1_CLK_ENABLE();
-        _dmaHandle.Init.Channel = DMA_CHANNEL_0;
-        _dmaHandle.Instance = (direction == DMA_MEMORY_TO_PERIPH) ? DMA1_Stream5 : DMA1_Stream2;
+    if(_spi.handle.Instance==SPI3){
+      SPI3_DMA_CLK_ENABLE();
+      _dmaRx.Instance = SPI3_DMA_RX;
+      _dmaTx.Instance = SPI3_DMA_TX;
+      #ifdef STM32F4xx
+        _dmaRx.Init.Channel = DMA_CHANNEL_0;
+        _dmaTx.Init.Channel = DMA_CHANNEL_0;
       #endif
     }
   #endif
+  __HAL_LINKDMA(&_spi.handle,hdmarx,_dmaRx);
+  __HAL_LINKDMA(&_spi.handle,hdmatx,_dmaTx);
 
-  HAL_DMA_Init(&_dmaHandle);
+
+  HALOK(HAL_SPI_Init(&_spi.handle), "HAL_SPI_Init failed");
+  __HAL_SPI_ENABLE(&_spi.handle);
+}
+
+void MarlinSPI::enableDMA(){
+  HALOK(HAL_DMA_Init(&_dmaRx), "DMA RX HAL_DMA_Init failed");
+  HALOK(HAL_DMA_Init(&_dmaTx), "DMA TX HAL_DMA_Init failed");
+}
+
+void MarlinSPI::disableDMA(){
+  HAL_DMA_Abort(&_dmaRx); //don't use HALOK here
+  HAL_DMA_DeInit(&_dmaRx);
+  HAL_DMA_Abort(&_dmaTx); //don't use HALOK here
+  HAL_DMA_DeInit(&_dmaTx);
 }
 
 byte MarlinSPI::transfer(uint8_t _data) {
   uint8_t rxData = 0xFF;
-  HAL_SPI_TransmitReceive(&_spi.handle, &_data, &rxData, 1, HAL_MAX_DELAY);
+  HALOK(HAL_SPI_TransmitReceive(&_spi.handle, &_data, &rxData, 1, HAL_MAX_DELAY), "HAL_SPI_TransmitReceive failed");
   return rxData;
 }
 
-__STATIC_INLINE void LL_SPI_EnableDMAReq_RX(SPI_TypeDef *SPIx) { SET_BIT(SPIx->CR2, SPI_CR2_RXDMAEN); }
-__STATIC_INLINE void LL_SPI_EnableDMAReq_TX(SPI_TypeDef *SPIx) { SET_BIT(SPIx->CR2, SPI_CR2_TXDMAEN); }
-
 uint8_t MarlinSPI::dmaTransfer(const void *transmitBuf, void *receiveBuf, uint16_t length) {
-  const uint8_t ff = 0xFF;
+  // const uint8_t ff = 0xFF;
+  // // check for 2 lines transfer
+  // if (transmitBuf == nullptr && _spi.handle.Init.Direction == SPI_DIRECTION_2LINES && _spi.handle.Init.Mode == SPI_MODE_MASTER) {
+  //   transmitBuf = &ff;
+  //   mincTransmit = false;
+  // }
 
-  //if (!LL_SPI_IsEnabled(_spi.handle)) // only enable if disabled
-  __HAL_SPI_ENABLE(&_spi.handle);
-
-  if (receiveBuf) {
-    setupDma(_spi.handle, _dmaRx, DMA_PERIPH_TO_MEMORY, true);
-    HAL_DMA_Start(&_dmaRx, (uint32_t)&(_spi.handle.Instance->DR), (uint32_t)receiveBuf, length);
-    LL_SPI_EnableDMAReq_RX(_spi.handle.Instance); // Enable Rx DMA Request
+  if(!transmitBuf){
+    transmitBuf = receiveBuf;
   }
 
-  // check for 2 lines transfer
-  bool mincTransmit = true;
-  if (transmitBuf == nullptr && _spi.handle.Init.Direction == SPI_DIRECTION_2LINES && _spi.handle.Init.Mode == SPI_MODE_MASTER) {
-    transmitBuf = &ff;
-    mincTransmit = false;
-  }
+  enableDMA();
 
-  if (transmitBuf) {
-    setupDma(_spi.handle, _dmaTx, DMA_MEMORY_TO_PERIPH, mincTransmit);
-    HAL_DMA_Start(&_dmaTx, (uint32_t)transmitBuf, (uint32_t)&(_spi.handle.Instance->DR), length);
+  HALOK(HAL_DMA_Start(&_dmaRx, (uint32_t)&_spi.handle.Instance->DR, (uint32_t)receiveBuf, length), "RX HAL_DMA_Start failed");
+  LL_SPI_EnableDMAReq_RX(_spi.handle.Instance); // Enable Rx DMA Request
+
+  if (_spi.handle.Init.Direction == SPI_DIRECTION_2LINES){
+    HALOK(HAL_DMA_Start(&_dmaTx, (uint32_t)transmitBuf, (uint32_t)&_spi.handle.Instance->DR, length), "TX HAL_DMA_Start failed");
     LL_SPI_EnableDMAReq_TX(_spi.handle.Instance); // Enable Tx DMA Request
   }
+  
+  //__HAL_SPI_ENABLE(&_spi.handle);
+  HALOK(HAL_DMA_PollForTransfer(&_dmaTx, HAL_DMA_FULL_TRANSFER, HAL_MAX_DELAY), "HAL_DMA_PollForTransfer failed");
+  //HAL_DMA_PollForTransfer(&_dmaRx, HAL_DMA_FULL_TRANSFER, HAL_MAX_DELAY);
 
-  if (transmitBuf) {
-    HAL_DMA_PollForTransfer(&_dmaTx, HAL_DMA_FULL_TRANSFER, HAL_MAX_DELAY);
-    HAL_DMA_Abort(&_dmaTx);
-    HAL_DMA_DeInit(&_dmaTx);
-  }
+  CLEAR_BIT(_spi.handle.Instance->CR2, SPI_CR2_TXDMAEN | SPI_CR2_RXDMAEN); // Disable Rx/Tx DMA Request  
 
-  // while ((_spi.handle.Instance->SR & SPI_FLAG_RXNE) != SPI_FLAG_RXNE) {}
-
-  if (receiveBuf) {
-    HAL_DMA_PollForTransfer(&_dmaRx, HAL_DMA_FULL_TRANSFER, HAL_MAX_DELAY);
-    HAL_DMA_Abort(&_dmaRx);
-    HAL_DMA_DeInit(&_dmaRx);
-  }
+  disableDMA();
 
   return 1;
 }
 
 uint8_t MarlinSPI::dmaSend(const void * transmitBuf, uint16_t length, bool minc) {
-  setupDma(_spi.handle, _dmaTx, DMA_MEMORY_TO_PERIPH, minc);
-  HAL_DMA_Start(&_dmaTx, (uint32_t)transmitBuf, (uint32_t)&(_spi.handle.Instance->DR), length);
-  __HAL_SPI_ENABLE(&_spi.handle);
+  enableDMA();
+
+  HALOK(HAL_DMA_Start(&_dmaTx, (uint32_t)transmitBuf, (uint32_t)&_spi.handle.Instance->DR, length), "TX HAL_DMA_Start failed");
   LL_SPI_EnableDMAReq_TX(_spi.handle.Instance); // Enable Tx DMA Request
-  HAL_DMA_PollForTransfer(&_dmaTx, HAL_DMA_FULL_TRANSFER, HAL_MAX_DELAY);
-  HAL_DMA_Abort(&_dmaTx);
-  // DeInit objects
-  HAL_DMA_DeInit(&_dmaTx);
-  return 1;
+
+  //__HAL_SPI_ENABLE(&_spi.handle);
+  HALOK(HAL_DMA_PollForTransfer(&_dmaRx, HAL_DMA_FULL_TRANSFER, HAL_MAX_DELAY), "TX HAL_DMA_PollForTransfer failed");
+  
+  CLEAR_BIT(_spi.handle.Instance->CR2, SPI_CR2_TXDMAEN); // Disable Tx DMA Request
+  if (_spi.handle.Init.Direction == SPI_DIRECTION_2LINES)
+  {
+    __HAL_SPI_CLEAR_OVRFLAG(&_spi.handle);
+  }
+
+  disableDMA();
+
+  return 1; 
 }
 
 #endif // HAL_STM32 && !STM32H7xx

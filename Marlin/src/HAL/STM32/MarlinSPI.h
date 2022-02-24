@@ -49,6 +49,43 @@ extern "C" {
 
 #define DATA_SIZE_8BIT SPI_DATASIZE_8BIT
 #define DATA_SIZE_16BIT SPI_DATASIZE_16BIT
+  
+#if defined(STM32F1xx)
+  #define SPI1_DMA_CLK_ENABLE() __HAL_RCC_DMA1_CLK_ENABLE()
+  #define SPI1_DMA_RX           DMA1_Channel2
+  #define SPI1_DMA_TX           DMA1_Channel3
+
+  #define SPI2_DMA_CLK_ENABLE() __HAL_RCC_DMA1_CLK_ENABLE()
+  #define SPI2_DMA_RX           DMA1_Channel4
+  #define SPI2_DMA_TX           DMA1_Channel5
+
+  #define SPI3_DMA_CLK_ENABLE()   __HAL_RCC_DMA2_CLK_ENABLE()
+  #define SPI3_DMA_RX           DMA2_Channel1
+  #define SPI3_DMA_TX           DMA2_Channel2
+#elif defined(STM32F4xx)
+  #define SPI1_DMA_CLK_ENABLE()   __HAL_RCC_DMA2_CLK_ENABLE()
+  #define SPI1_DMA_RX           DMA2_Stream0
+  #define SPI1_DMA_TX           DMA2_Stream3
+
+  #define SPI2_DMA_CLK_ENABLE()   __HAL_RCC_DMA1_CLK_ENABLE()
+  #define SPI2_DMA_RX           DMA1_Stream3
+  #define SPI2_DMA_TX           DMA1_Stream4
+  
+  #define SPI3_DMA_CLK_ENABLE()   __HAL_RCC_DMA1_CLK_ENABLE()
+  #define SPI3_DMA_RX           DMA1_Stream2
+  #define SPI3_DMA_TX           DMA1_Stream5
+#endif
+
+#if ENABLED(MARLIN_DEV_MODE)
+  #define HALOK(STATUS, ERRMSG) (STATUS)
+#else
+  #include "../../MarlinCore.h"
+  #define HALOK(STATUS, ERRMSG) {if((STATUS) != HAL_OK) {SERIAL_ERROR_MSG("Message: ", ERRMSG, " in ", __FILE__, " at line ", __LINE__);kill(F(ERRMSG));}}
+#endif
+
+__STATIC_INLINE void LL_SPI_EnableDMAReq_RX(SPI_TypeDef *SPIx) { SET_BIT(SPIx->CR2, SPI_CR2_RXDMAEN); }
+__STATIC_INLINE void LL_SPI_EnableDMAReq_TX(SPI_TypeDef *SPIx) { SET_BIT(SPIx->CR2, SPI_CR2_TXDMAEN); }
+
 
 class MarlinSPI {
 public:
@@ -90,7 +127,8 @@ public:
   void setClockDivider(uint8_t _div);
 
 private:
-  void setupDma(SPI_HandleTypeDef &_spiHandle, DMA_HandleTypeDef &_dmaHandle, uint32_t direction, bool minc = false);
+  void enableDMA();
+  void disableDMA();
 
   spi_t _spi;
   DMA_HandleTypeDef _dmaTx;
