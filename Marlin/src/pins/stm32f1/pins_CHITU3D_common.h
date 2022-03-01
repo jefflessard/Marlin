@@ -34,20 +34,30 @@
 #define DISABLE_JTAG
 
 //
-// EEPROM
+// EEPROM (ATHYC816 24C16N - AT24C16 clone)
 //
-
 #if NO_EEPROM_SELECTED
-  #define FLASH_EEPROM_EMULATION
+  //#define FLASH_EEPROM_EMULATION
+  //#define I2C_EEPROM
+  #define IIC_BL24CXX_EEPROM
 #endif
 
-#if ENABLED(FLASH_EEPROM_EMULATION)
+#if ENABLED(IIC_BL24CXX_EEPROM)
+  #define IIC_EEPROM_SDA                     PG1  // EEPROM_SDA
+  #define IIC_EEPROM_SCL                     PG0  // EEPROM_SCL
+  #define EEPROM_WP_PIN                     PF12  // EEPROM_WP
+  #define MARLIN_EEPROM_SIZE               0x800  // 2Kb (24C16)
+#elif ENABLED(I2C_EEPROM)
+  #define SOFT_I2C_EEPROM
+  #define I2C_SDA_PIN                        PG1  // EEPROM_SDA
+  #define I2C_SCL_PIN                        PG0  // EEPROM_SCL
+                                          //PF12  // EEPROM_WP
+  #define MARLIN_EEPROM_SIZE               0x800  // 2Kb (24C16)
+#elif ENABLED(FLASH_EEPROM_EMULATION)
   // SoC Flash (framework-arduinoststm32-maple/STM32F1/libraries/EEPROM/EEPROM.h)
   #define EEPROM_START_ADDRESS (0x8000000UL + (512 * 1024) - 2 * EEPROM_PAGE_SIZE)
   #define EEPROM_PAGE_SIZE     (0x800U)           // 2KB, but will use 2x more (4KB)
   #define MARLIN_EEPROM_SIZE    EEPROM_PAGE_SIZE
-#else
-  #define MARLIN_EEPROM_SIZE              0x800U  // On SD, Limit to 2KB, require this amount of RAM
 #endif
 
 //
@@ -107,27 +117,30 @@
 //
 #define BEEPER_PIN                          PB0
 //#define LED_PIN                           PD3
-//#define POWER_LOSS_PIN                    PG2   // PG4 PW_DET
-
-#ifndef FIL_RUNOUT_PIN
-  #define FIL_RUNOUT_PIN                    PA15  // MT_DET
-#endif
-
-// SPI Flash
-#define HAS_SPI_FLASH                          1
-#if HAS_SPI_FLASH
-  #define SPI_FLASH_SIZE               0x1000000  // 16MB
-#endif
-
-// SPI 2
-#define SPI_DEVICE                             2
-#define SPI_FLASH_CS_PIN                    PB12
-#define SPI_FLASH_MOSI_PIN                  PB15
-#define SPI_FLASH_MISO_PIN                  PB14
-#define SPI_FLASH_SCK_PIN                   PB13
 
 //
-// TFT with FSMC interface
+// Power Loss (LM393)
+//
+#define POWER_LOSS_PIN                       PG2  // POWER_KEY_DETECT / EXT6                
+                                          // PG4  // ERROR_DECTECT / EXT1
+
+#ifndef FIL_RUNOUT_PIN
+  #define FIL_RUNOUT_PIN                    PA15   // MT_DET
+#endif
+
+//
+// SPI Flash (Winbond W25Q16JVISQ on SPI2)
+//
+#define HAS_SPI_FLASH                          1
+#define SPI_FLASH_SIZE                 0x1000000  // 16MB
+#define SPI_DEVICE                             2
+#define SPI_FLASH_CS_PIN                    PB12  // F_CS
+#define SPI_FLASH_MOSI_PIN                  PB15  // SPI2_MOSI
+#define SPI_FLASH_MISO_PIN                  PB14  // SPI2_MISO
+#define SPI_FLASH_SCK_PIN                   PB13  // SPI2_SCK
+
+//
+// TFT with FSMC interface and SPI1
 //
 #if HAS_FSMC_TFT
   #define TOUCH_CS_PIN                      PB7   // SPI1_NSS
@@ -136,17 +149,20 @@
   #define TOUCH_MOSI_PIN                    PA7   // SPI1_MOSI
   #define TOUCH_INT_PIN                     PB6   // 7846-INT
 
-  #define TFT_RESET_PIN                     PF11
-  #define TFT_BACKLIGHT_PIN                 PD13
+  #define TFT_RESET_PIN                     PF11  // LCD-RST
+  #define TFT_BACKLIGHT_PIN                 PD13  // LIGHT-PWM
 
   #define LCD_USE_DMA_FSMC                        // Use DMA transfers to send data to the TFT
-  #define FSMC_CS_PIN                       PD7
-  #define FSMC_RS_PIN                       PD11
+  #define FSMC_CS_PIN                       PD7   // PS-CLK
+  #define FSMC_RS_PIN                       PD11  // A16-RS
   #define FSMC_DMA_DEV                      DMA2
   #define FSMC_DMA_CHANNEL               DMA_CH5
 
   #define TFT_CS_PIN                 FSMC_CS_PIN
   #define TFT_RS_PIN                 FSMC_RS_PIN
+
+                                           //PD4  // LCD-nOE
+                                           //PD5  // LCD-nWE
 #endif
 
 #if HAS_TFT_LVGL_UI
@@ -162,18 +178,16 @@
   #define TFT_BUFFER_SIZE                  14400
 #endif
 
-// SPI1(PA7)=LCD & SPI2(PB14)=FLASH & SPI3(PB5)=E1, are not available
-// so SPI2 is required.
-// #define SPI_DEVICE                             2
-// #define SD_SCK_PIN                          PB13
-// #define SD_MISO_PIN                         PB14
-// #define SD_MOSI_PIN                         PB15
-// #define SD_SS_PIN                           PB12
+// SD Card connected on SDIO, not on SPI
+#define SD_SCK_PIN                            -1
+#define SD_MISO_PIN                           -1
+#define SD_MOSI_PIN                           -1
+#define SD_SS_PIN                             -1
 
 //
-// SD Card
+// SD Card (SDIO)
 //
 #define SDIO_SUPPORT
-#define SD_DETECT_PIN                        PF0   // PF0, but it isn't connected
+#define SD_DETECT_PIN                        PF0  // CARD_DETECT
 #define SDIO_CLOCK                       4500000
-#define SDIO_READ_RETRIES                     16
+//#define SDIO_READ_RETRIES                     16
