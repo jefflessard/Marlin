@@ -70,6 +70,10 @@ void IIC::init() {
   SET_OUTPUT(IIC_EEPROM_SCL);
   IIC_SCL_1();
   IIC_SDA_1();
+
+  #if PIN_EXISTS(EEPROM_WP)
+      OUT_WRITE(EEPROM_WP_PIN, LOW);
+  #endif
 }
 
 // Generate IIC start signal
