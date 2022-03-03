@@ -58,7 +58,7 @@ void TFT_FSMC::Init() {
   SRAMx.Init.ExtendedMode = FSMC_EXTENDED_MODE_ENABLE;
   SRAMx.Init.AsynchronousWait = FSMC_ASYNCHRONOUS_WAIT_DISABLE;
   SRAMx.Init.WriteBurst = FSMC_WRITE_BURST_DISABLE;
-  #ifdef STM32F4xx
+  #if defined(STM32F4xx) || defined(STM32F1xx)
     SRAMx.Init.PageSize = FSMC_PAGE_SIZE_NONE;
   #endif
   // Read Timing - relatively slow to ensure ID information is correctly read from TFT controller

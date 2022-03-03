@@ -233,9 +233,7 @@ uint32_t lv_get_pic_addr(uint8_t *Pname) {
 
   currentFlashPage = 0;
 
-  #if ENABLED(MARLIN_DEV_MODE)
-    SERIAL_ECHOLNPGM("Getting picture SPI Flash Address: ", (const char*)Pname);
-  #endif
+  DEBUG_ECHOLNPGM("Getting picture SPI Flash Address: ", (const char*)Pname);
 
   W25QXX.init(SPI_QUARTER_SPEED);
 
@@ -408,9 +406,7 @@ uint32_t Pic_Info_Write(uint8_t *P_name, uint32_t P_size) {
     char dosFilename[FILENAME_LENGTH];
     createFilename(dosFilename, entry);
     if (!file.open(&dir, dosFilename, O_READ)) {
-      #if ENABLED(MARLIN_DEV_MODE)
-        SERIAL_ECHOLNPGM("Error opening Asset: ", fn);
-      #endif
+      DEBUG_ECHOLNPGM("Error opening Asset: ", fn);
       return;
     }
 
@@ -463,8 +459,8 @@ uint32_t Pic_Info_Write(uint8_t *P_name, uint32_t P_size) {
           Pic_Write_Addr += pbr;
         } while (pbr >= BMP_WRITE_BUF_LEN);
       #endif
-      #if ENABLED(MARLIN_DEV_MODE)
-        SERIAL_ECHOLNPGM("Space used: ", fn, " - ", (SPIFlash.getCurrentPage() + 1) * SPI_FLASH_PageSize / 1024, "KB");
+      #if ENABLED(DEBUG_MKS_UI)
+        DEBUG_ECHOLNPGM("Space used: ", fn, " - ", (SPIFlash.getCurrentPage() + 1) * SPI_FLASH_PageSize / 1024, "KB");
         totalCompressed += (SPIFlash.getCurrentPage() + 1) * SPI_FLASH_PageSize;
       #endif
       SPIFlash.endWrite();
@@ -481,9 +477,7 @@ uint32_t Pic_Info_Write(uint8_t *P_name, uint32_t P_size) {
 
     file.close();
 
-    #if ENABLED(MARLIN_DEV_MODE)
-      SERIAL_ECHOLNPGM("Asset added: ", fn);
-    #endif
+    DEBUG_ECHOLNPGM("Asset added: ", fn);
   }
 
   void UpdateAssets() {
@@ -535,11 +529,11 @@ uint32_t Pic_Info_Write(uint8_t *P_name, uint32_t P_size) {
     }
     dir.close();
 
-    #if ENABLED(MARLIN_DEV_MODE)
+    #if ENABLED(DEBUG_MKS_UI)
       uint8_t pic_counter = 0;
       W25QXX.SPI_FLASH_BufferRead(&pic_counter, PIC_COUNTER_ADDR, 1);
-      SERIAL_ECHOLNPGM("Total assets loaded: ", pic_counter);
-      SERIAL_ECHOLNPGM("Total Uncompressed: ", totalSizes, ", Compressed: ", totalCompressed);
+      DEBUG_ECHOLNPGM("Total assets loaded: ", pic_counter);
+      DEBUG_ECHOLNPGM("Total Uncompressed: ", totalSizes, ", Compressed: ", totalCompressed);
     #endif
   }
 

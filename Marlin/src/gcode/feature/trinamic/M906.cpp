@@ -61,6 +61,7 @@ void GcodeSuite::M906() {
     const int8_t index = parser.byteval('I', -1);
   #else
     constexpr int8_t index = -1;
+    UNUSED(index);
   #endif
 
   LOOP_LOGICAL_AXES(i) if (uint16_t value = parser.intval(axis_codes[i])) {
