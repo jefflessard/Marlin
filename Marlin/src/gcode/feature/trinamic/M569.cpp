@@ -51,6 +51,7 @@ static void set_stealth_status(const bool enable, const int8_t eindex) {
     const int8_t index = parser.byteval('I', -1);
   #else
     constexpr int8_t index = -1;
+    UNUSED(index);
   #endif
 
   LOOP_LOGICAL_AXES(i) if (parser.seen(axis_codes[i])) {

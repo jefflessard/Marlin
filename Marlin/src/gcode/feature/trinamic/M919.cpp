@@ -95,6 +95,7 @@ void GcodeSuite::M919() {
     const int8_t index = parser.byteval('I');
   #else
     constexpr int8_t index = -1;
+    UNUSED(index);
   #endif
 
   auto make_chopper_timing = [](chopper_timing_t bct, const int8_t toff, const int8_t hend, const int8_t hstrt) {

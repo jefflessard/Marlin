@@ -170,6 +170,9 @@ void tft_lvgl_init() {
   lv_disp_drv_init(&disp_drv);    // Basic initialization
   disp_drv.flush_cb = my_disp_flush; // Set your driver function
   disp_drv.buffer = &disp_buf;    // Assign the buffer to the display
+  #if ENABLED(DEBUG_MKS_UI)
+    disp_drv.monitor_cb = my_monitor_cb; // Set performance monitoring callback
+  #endif
   lv_disp_drv_register(&disp_drv);  // Finally register the driver
 
   lv_indev_drv_t indev_drv;
@@ -285,6 +288,12 @@ void my_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * co
 
   W25QXX.init(SPI_QUARTER_SPEED);
 }
+
+#if ENABLED(DEBUG_MKS_UI)
+  void my_monitor_cb(struct _disp_drv_t * disp_drv, uint32_t time, uint32_t px){
+    DEBUG_ECHOLNPGM("mks_ui: ",px," pixels rendered in ",time);
+  }
+#endif
 
 #if ENABLED(USE_SPI_DMA_TC)
   bool get_lcd_dma_lock() { return lcd_dma_trans_lock; }
