@@ -116,12 +116,12 @@
 // Misc
 //
 #define BEEPER_PIN                          PB0
-//#define LED_PIN                           PD3
+#define LED_PIN                             PD3  // M42 P51 T1 S0 to turn on board LED
 
 //
 // Power Loss (LM393)
 //
-#define POWER_LOSS_PIN                       PG2  // POWER_KEY_DETECT / EXT6                
+#define POWER_LOSS_PIN                       PG2  // POWER_KEY_DETECT / EXT6
                                           // PG4  // ERROR_DECTECT / EXT1
 
 #ifndef FIL_RUNOUT_PIN
@@ -132,7 +132,7 @@
 // SPI Flash (Winbond W25Q16JVISQ on SPI2)
 //
 #define HAS_SPI_FLASH                          1
-#define SPI_FLASH_SIZE                 0x1000000  // 16MB
+#define SPI_FLASH_SIZE                  0x200000  // 16Mbit = 2MB
 #define SPI_DEVICE                             2
 #define SPI_FLASH_CS_PIN                    PB12  // F_CS
 #define SPI_FLASH_MOSI_PIN                  PB15  // SPI2_MOSI
@@ -167,12 +167,12 @@
 
 #if HAS_TFT_LVGL_UI
   // LVGL
-  // #define HAS_SPI_FLASH_FONT                   1
-  // #define HAS_GCODE_PREVIEW                    1
-  // #define HAS_GCODE_DEFAULT_VIEW_IN_FLASH      0
-  // #define HAS_LANG_SELECT_SCREEN               1
-  // #define HAS_BAK_VIEW_IN_FLASH                0
-  // #define HAS_LOGO_IN_FLASH                    0
+  #define HAS_SPI_FLASH_FONT                   1
+  #define HAS_GCODE_PREVIEW                    1
+  #define HAS_GCODE_DEFAULT_VIEW_IN_FLASH      0
+  #define HAS_LANG_SELECT_SCREEN               1
+  #define HAS_BAK_VIEW_IN_FLASH                0
+  #define HAS_LOGO_IN_FLASH                    0
 #elif ENABLED(TFT_COLOR_UI)
   // Color UI
   #define TFT_BUFFER_SIZE                  14400
