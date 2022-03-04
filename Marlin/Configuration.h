@@ -2804,6 +2804,9 @@
 #define TFT_LVGL_UI
 
 #if ENABLED(TFT_LVGL_UI)
+  //#define DEBUG_MKS_UI
+  #define LVGL_BUFFER_LINES 12 // Recmmendend LCD_Vertical_Resolution/10. E.g. 320 / 10 = 32. But may be too large to hold on RAM.
+  #define LVGL_USE_DUAL_BUFFER
   //#define MKS_WIFI_MODULE  // MKS WiFi module
 #endif
 

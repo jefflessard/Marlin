@@ -59,7 +59,7 @@ class TFT_FSMC {
 
     static uint32_t ReadID(tft_data_t Reg);
     static void Transmit(tft_data_t Data) { LCD->RAM = Data; __DSB(); }
-    static void TransmitDMA(uint32_t MemoryIncrease, uint16_t *Data, uint16_t Count);
+    static void TransmitDMA(uint32_t MemoryIncrease, uint16_t *Data, uint16_t Count, bool pollfortransfer=true);
 
   public:
     static void Init();
@@ -73,7 +73,7 @@ class TFT_FSMC {
     static void WriteData(uint16_t Data) { Transmit(tft_data_t(Data)); }
     static void WriteReg(uint16_t Reg) { LCD->REG = tft_data_t(Reg); __DSB(); }
 
-    static void WriteSequence(uint16_t *Data, uint16_t Count) { TransmitDMA(DMA_PINC_ENABLE, Data, Count); }
+    static void WriteSequence(uint16_t *Data, uint16_t Count, bool async=false) { TransmitDMA(DMA_PINC_ENABLE, Data, Count, !async); }
     static void WriteMultiple(uint16_t Color, uint16_t Count) { TransmitDMA(DMA_PINC_DISABLE, &Color, Count); }
     static void WriteMultiple(uint16_t Color, uint32_t Count) {
       while (Count > 0) {

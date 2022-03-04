@@ -37,8 +37,12 @@
 
 //#define TFT_ROTATION TFT_ROTATE_180
 
-extern uint8_t bmp_public_buf[14 * 1024];
-extern uint8_t public_buf[513];
+#ifndef LVGL_BUFFER_LINES
+  #define LVGL_BUFFER_LINES 14
+#endif
+#define LVGL_BUFFER_SIZE  LVGL_BUFFER_LINES * TFT_WIDTH * LV_COLOR_DEPTH/8
+extern uint8_t bmp_public_buf[LVGL_BUFFER_SIZE];
+extern uint8_t public_buf[];
 
 void tft_lvgl_init();
 void my_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p);

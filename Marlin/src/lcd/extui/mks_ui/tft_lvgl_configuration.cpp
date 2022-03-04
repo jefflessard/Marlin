@@ -84,8 +84,12 @@ lv_group_t*  g;
 uint16_t DeviceCode = 0x9488;
 extern uint8_t sel_id;
 
-uint8_t bmp_public_buf[14 * 1024];
+
+uint8_t bmp_public_buf[LVGL_BUFFER_SIZE];
 uint8_t public_buf[513];
+#if ENABLED(LVGL_USE_DUAL_BUFFER)
+  uint8_t bmp_second_buf[LVGL_BUFFER_SIZE];
+#endif
 
 extern bool flash_preview_begin, default_preview_flg, gcode_preview_over;
 
@@ -164,7 +168,11 @@ void tft_lvgl_init() {
 
   lv_init();
 
-  lv_disp_buf_init(&disp_buf, bmp_public_buf, nullptr, LV_HOR_RES_MAX * 14); // Initialize the display buffer
+  #if ENABLED(LVGL_USE_DUAL_BUFFER)
+    lv_disp_buf_init(&disp_buf, bmp_public_buf, bmp_second_buf, LV_HOR_RES_MAX * LVGL_BUFFER_LINES); // Initialize the display buffer
+  #else
+    lv_disp_buf_init(&disp_buf, bmp_public_buf, nullptr, LV_HOR_RES_MAX * LVGL_BUFFER_LINES); // Initialize the display buffer
+  #endif
 
   lv_disp_drv_t disp_drv;     // Descriptor of a display driver
   lv_disp_drv_init(&disp_drv);    // Basic initialization
@@ -281,6 +289,10 @@ void my_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * co
     lcd_dma_trans_lock = true;
     SPI_TFT.tftio.WriteSequenceIT((uint16_t*)color_p, width * height);
     TFT_SPI::DMAtx.XferCpltCallback = dmc_tc_handler;
+  #elif ENABLED(LVGL_USE_DUAL_BUFFER)
+    //while(SPI_TFT.tftio.isBusy()){}
+    SPI_TFT.tftio.WriteSequence((uint16_t*)color_p, width * height, true);
+    lv_disp_flush_ready(disp_drv_p); // Indicate you are ready with the flushing
   #else
     SPI_TFT.tftio.WriteSequence((uint16_t*)color_p, width * height);
     lv_disp_flush_ready(disp_drv_p); // Indicate you are ready with the flushing

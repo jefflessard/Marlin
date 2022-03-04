@@ -30,6 +30,7 @@
 
 #include "tft_fsmc.h"
 #include "pinconfig.h"
+#include <stm32yyxx_ll_dma.h>
 
 SRAM_HandleTypeDef TFT_FSMC::SRAMx;
 DMA_HandleTypeDef TFT_FSMC::DMAtx;
@@ -147,27 +148,18 @@ uint32_t TFT_FSMC::ReadID(tft_data_t Reg) {
 }
 
 bool TFT_FSMC::isBusy() {
-  #if defined(STM32F1xx)
-    volatile bool dmaEnabled = (DMAtx.Instance->CCR & DMA_CCR_EN) != RESET;
-  #elif defined(STM32F4xx)
-    volatile bool dmaEnabled = DMAtx.Instance->CR & DMA_SxCR_EN;
-  #endif
-  if (dmaEnabled) {
-    if (__HAL_DMA_GET_FLAG(&DMAtx, __HAL_DMA_GET_TC_FLAG_INDEX(&DMAtx)) != 0 || __HAL_DMA_GET_FLAG(&DMAtx, __HAL_DMA_GET_TE_FLAG_INDEX(&DMAtx)) != 0)
-      Abort();
-  }
-  else
-    Abort();
-  return dmaEnabled;
+  return LL_DMA_IsEnabledChannel(DMAtx.DmaBaseAddress, DMAtx.ChannelIndex) && !__HAL_DMA_GET_FLAG(&DMAtx, __HAL_DMA_GET_TC_FLAG_INDEX(&DMAtx));
 }
 
-void TFT_FSMC::TransmitDMA(uint32_t MemoryIncrease, uint16_t *Data, uint16_t Count) {
+void TFT_FSMC::TransmitDMA(uint32_t MemoryIncrease, uint16_t *Data, uint16_t Count, bool pollfortransfer) {
   DMAtx.Init.PeriphInc = MemoryIncrease;
   HAL_DMA_Init(&DMAtx);
   DataTransferBegin();
   HAL_DMA_Start(&DMAtx, (uint32_t)Data, (uint32_t)&(LCD->RAM), Count);
-  HAL_DMA_PollForTransfer(&DMAtx, HAL_DMA_FULL_TRANSFER, HAL_MAX_DELAY);
-  Abort();
+  if(pollfortransfer){
+    HAL_DMA_PollForTransfer(&DMAtx, HAL_DMA_FULL_TRANSFER, HAL_MAX_DELAY);
+    Abort();
+  }
 }
 
 #endif // HAS_FSMC_TFT

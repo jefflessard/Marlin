@@ -120,12 +120,16 @@ public:
   inline static void WriteData(uint16_t Data) { io.WriteData(Data); };
   inline static void WriteReg(uint16_t Reg) { io.WriteReg(Reg); };
 
-  inline static void WriteSequence(uint16_t *Data, uint16_t Count) { io.WriteSequence(Data, Count); };
+  #if ENABLED(LVGL_USE_DUAL_BUFFER)
+    inline static void WriteSequence(uint16_t *Data, uint16_t Count, bool async=false) { io.WriteSequence(Data, Count, async); };
+  #else
+    inline static void WriteSequence(uint16_t *Data, uint16_t Count) { io.WriteSequence(Data, Count); };
+  #endif
 
   #if ENABLED(USE_SPI_DMA_TC)
     inline static void WriteSequenceIT(uint16_t *Data, uint16_t Count) { io.WriteSequenceIT(Data, Count); };
   #endif
-
+  
   // static void WriteMultiple(uint16_t Color, uint16_t Count) { static uint16_t Data; Data = Color; TransmitDMA(DMA_MINC_DISABLE, &Data, Count); }
   inline static void WriteMultiple(uint16_t Color, uint32_t Count) { io.WriteMultiple(Color, Count); };
 
