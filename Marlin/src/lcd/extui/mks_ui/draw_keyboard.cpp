@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../inc/MarlinConfig.h"
 #include "../../../gcode/queue.h"
@@ -33,14 +32,14 @@
 extern lv_group_t *g;
 static lv_obj_t *scr;
 
-#define LV_KB_CTRL_BTN_FLAGS (LV_BTNM_CTRL_NO_REPEAT | LV_BTNM_CTRL_CLICK_TRIG)
+#define LV_KB_CTRL_BTN_FLAGS (LV_BTNMATRIX_CTRL_NO_REPEAT | LV_BTNMATRIX_CTRL_CLICK_TRIG)
 
 static const char * kb_map_lc[] = {"1#", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", LV_SYMBOL_BACKSPACE, "\n",
                                    "ABC", "a", "s", "d", "f", "g", "h", "j", "k", "l", LV_SYMBOL_NEW_LINE, "\n",
                                    "_", "-", "z", "x", "c", "v", "b", "n", "m", ".", ",", ":", "\n",
                                    LV_SYMBOL_CLOSE, LV_SYMBOL_LEFT, " ", LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""};
 
-static const lv_btnm_ctrl_t kb_ctrl_lc_map[] = {
+static const lv_btnmatrix_ctrl_t kb_ctrl_lc_map[] = {
   LV_KB_CTRL_BTN_FLAGS | 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7,
   LV_KB_CTRL_BTN_FLAGS | 6, 3, 3, 3, 3, 3, 3, 3, 3, 3, 7,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -51,7 +50,7 @@ static const char * kb_map_uc[] = {"1#", "Q", "W", "E", "R", "T", "Y", "U", "I",
                                    "_", "-", "Z", "X", "C", "V", "B", "N", "M", ".", ",", ":", "\n",
                                    LV_SYMBOL_CLOSE, LV_SYMBOL_LEFT, " ", LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""};
 
-static const lv_btnm_ctrl_t kb_ctrl_uc_map[] = {
+static const lv_btnmatrix_ctrl_t kb_ctrl_uc_map[] = {
   LV_KB_CTRL_BTN_FLAGS | 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 7,
   LV_KB_CTRL_BTN_FLAGS | 6, 3, 3, 3, 3, 3, 3, 3, 3, 3, 7,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -62,21 +61,22 @@ static const char * kb_map_spec[] = {"0", "1", "2", "3", "4", "5", "6", "7", "8"
                                      "\\",  "@", "$", "(", ")", "{", "}", "[", "]", ";", "\"", "'", "\n",
                                      LV_SYMBOL_CLOSE, LV_SYMBOL_LEFT, " ", LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""};
 
-static const lv_btnm_ctrl_t kb_ctrl_spec_map[] = {
+static const lv_btnmatrix_ctrl_t kb_ctrl_spec_map[] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, LV_KB_CTRL_BTN_FLAGS | 2,
   LV_KB_CTRL_BTN_FLAGS | 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   LV_KB_CTRL_BTN_FLAGS | 2, 2, 6, 2, LV_KB_CTRL_BTN_FLAGS | 2};
 
-static const lv_btnm_ctrl_t kb_ctrl_num_map[] = {
+static const lv_btnmatrix_ctrl_t kb_ctrl_num_map[] = {
   1, 1, 1, LV_KB_CTRL_BTN_FLAGS | 2,
   1, 1, 1, LV_KB_CTRL_BTN_FLAGS | 2,
   1, 1, 1, 2,
   1, 1, 1, 1, 1
 };
 
-static void lv_kb_event_cb(lv_obj_t *kb, lv_event_t event) {
-  if (event != LV_EVENT_VALUE_CHANGED) return;
+static void lv_kb_event_cb(lv_event_t *event) {
+ /* //TODO upgrade to lvgl8
+   if (lv_event_get_code(event) != LV_EVENT_VALUE_CHANGED) return;
 
   lv_kb_ext_t *ext = (lv_kb_ext_t*)lv_obj_get_ext_attr(kb);
   const uint16_t btn_id = lv_btnm_get_active_btn(kb);
@@ -173,7 +173,7 @@ static void lv_kb_event_cb(lv_obj_t *kb, lv_event_t event) {
     }
     else
       lv_kb_set_ta(kb, nullptr); // De-assign the text area to hide it cursor if needed
-    return;
+    return; 
   }
 
   // Add the characters to the text area if set
@@ -211,11 +211,13 @@ static void lv_kb_event_cb(lv_obj_t *kb, lv_event_t event) {
   else {
     lv_ta_add_text(ext->ta, txt);
   }
+  */
 }
 
 void lv_draw_keyboard() {
   scr = lv_screen_create(KEYBOARD_UI, "");
 
+ //TODO upgrade to lvgl8
   // Create styles for the keyboard
   static lv_style_t rel_style, pr_style;
 
@@ -232,20 +234,20 @@ void lv_draw_keyboard() {
   pr_style.body.grad_color   = lv_color_make(0x6A, 0x3A, 0x0C);
 
   // Create a keyboard and apply the styles
-  lv_obj_t *kb = lv_kb_create(scr, nullptr);
+  lv_obj_t *kb = lv_kb_create(scr);
   lv_obj_set_event_cb(kb, lv_kb_event_cb);
   lv_kb_set_cursor_manage(kb, true);
-  lv_kb_set_style(kb, LV_KB_STYLE_BG, &lv_style_transp_tight);
-  lv_kb_set_style(kb, LV_KB_STYLE_BTN_REL, &rel_style);
-  lv_kb_set_style(kb, LV_KB_STYLE_BTN_PR, &pr_style);
+  lv_obj_add_style(kb, &lv_style_transp_tight, 0);
+  lv_obj_add_style(kb, &rel_style, 0);
+  lv_obj_add_style(kb, &pr_style, LV_STATE_PRESSED);
   #if HAS_ROTARY_ENCODER
     if (gCfgItems.encoder_enable) {
     }
   #endif
 
   // Create a text area. The keyboard will write here
-  lv_obj_t *ta = lv_ta_create(scr, nullptr);
-  lv_obj_align(ta, nullptr, LV_ALIGN_IN_TOP_MID, 0, 10);
+  lv_obj_t *ta = lv_ta_create(scr);
+  lv_obj_align_to(ta, nullptr, LV_ALIGN_TOP_MID, 0, 10);
   switch (keyboard_value) {
     case autoLevelGcodeCommand:
       get_gcode_command(AUTO_LEVELING_COMMAND_ADDR, (uint8_t *)public_buf_m);
