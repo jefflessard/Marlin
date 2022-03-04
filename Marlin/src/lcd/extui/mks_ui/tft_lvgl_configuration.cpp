@@ -176,6 +176,8 @@ void tft_lvgl_init() {
 
   lv_disp_drv_t disp_drv;     // Descriptor of a display driver
   lv_disp_drv_init(&disp_drv);    // Basic initialization
+  disp_drv.hor_res = TFT_WIDTH;   /*Set the horizontal resolution in pixels*/
+  disp_drv.ver_res = TFT_HEIGHT;  /*Set the vertical resolution in pixels*/
   disp_drv.flush_cb = my_disp_flush; // Set your driver function
   disp_drv.buffer = &disp_buf;    // Assign the buffer to the display
   #if ENABLED(DEBUG_MKS_UI)

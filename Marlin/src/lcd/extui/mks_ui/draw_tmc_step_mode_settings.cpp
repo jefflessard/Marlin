@@ -25,7 +25,6 @@
 #if BOTH(HAS_TFT_LVGL_UI, HAS_STEALTHCHOP)
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../module/stepper/indirection.h"
 #include "../../../feature/tmc_util.h"
@@ -53,8 +52,8 @@ static lv_obj_t *buttonXState = nullptr, *buttonYState = nullptr, *buttonZState 
 
 static lv_obj_t *buttonE1State = nullptr;
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
 
   auto toggle_chop = [&](auto &stepper, auto &button) {
     const bool isena = stepper.toggle_stepping_mode();
@@ -62,7 +61,7 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
     TERN_(EEPROM_SETTINGS, (void)settings.save());
   };
 
-  switch (obj->mks_obj_id) {
+  switch (mks_data(event).mks_obj_id) {
     case ID_TMC_MODE_RETURN:
       uiCfg.para_ui_page = false;
       lv_clear_tmc_step_mode_settings();

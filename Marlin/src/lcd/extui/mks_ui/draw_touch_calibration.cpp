@@ -26,7 +26,6 @@
 
 #include "draw_ui.h"
 #include "draw_touch_calibration.h"
-#include <lv_conf.h>
 
 #include "../../../inc/MarlinConfig.h"
 #include "../../tft_io/touch_calibration.h"
@@ -39,7 +38,7 @@ static lv_obj_t *status_label;
   extern uint8_t current_disp_ui;
 #endif
 
-static void event_handler(lv_obj_t *obj, lv_event_t event);
+static void event_handler(lv_event_t *event);
 
 enum {
   ID_TC_RETURN = 1
@@ -91,12 +90,12 @@ void lv_update_touch_calibration_screen() {
 
   // draw current message
   lv_label_set_text(status_label, str);
-  lv_obj_align(status_label, nullptr, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_align_to(status_label, nullptr, LV_ALIGN_CENTER, 0, 0);
 }
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  switch (obj->mks_obj_id) {
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  switch (mks_data(event).mks_obj_id) {
     case ID_TC_RETURN:
       TERN_(MKS_TEST, current_disp_ui = 1);
       goto_previous_ui();
@@ -108,7 +107,7 @@ void lv_draw_touch_calibration_screen() {
   scr = lv_screen_create(TOUCH_CALIBRATION_UI, "");
 
   status_label = lv_label_create(scr, "");
-  lv_obj_align(status_label, nullptr, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_align_to(status_label, nullptr, LV_ALIGN_CENTER, 0, 0);
 
   lv_refr_now(lv_refr_get_disp_refreshing());
 

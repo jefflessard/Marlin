@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI && USE_SENSORLESS
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../module/planner.h"
 #include "../../../module/probe.h"
@@ -43,9 +42,9 @@ enum {
   ID_SENSITIVITY_Z2
 };
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  switch (obj->mks_obj_id) {
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  switch (mks_data(event).mks_obj_id) {
     case ID_SENSITIVITY_RETURN:
       lv_clear_homing_sensitivity_settings();
       draw_return_ui();

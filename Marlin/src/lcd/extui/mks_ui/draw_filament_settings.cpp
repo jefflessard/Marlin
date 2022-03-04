@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../inc/MarlinConfig.h"
 
@@ -43,9 +42,9 @@ enum {
   ID_FILAMENT_SET_UP
 };
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  switch (obj->mks_obj_id) {
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  switch (mks_data(event).mks_obj_id) {
     case ID_FILAMENT_SET_RETURN:
       uiCfg.para_ui_page = false;
       lv_clear_filament_settings();

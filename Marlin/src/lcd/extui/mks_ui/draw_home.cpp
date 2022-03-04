@@ -27,7 +27,6 @@
 #include "draw_ready_print.h"
 #include "draw_set.h"
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../gcode/queue.h"
 #include "../../../inc/MarlinConfig.h"
@@ -45,9 +44,9 @@ enum {
   ID_H_OFF_XY
 };
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  switch (obj->mks_obj_id) {
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  switch (mks_data(event).mks_obj_id) {
     case ID_H_ALL:
       queue.inject_P(G28_STR);
       break;

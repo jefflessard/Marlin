@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../gcode/queue.h"
 #include "../../../module/temperature.h"
@@ -49,11 +48,11 @@ enum {
   extern uint8_t current_disp_ui;
 #endif
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  if (TERN1(AUTO_BED_LEVELING_BILINEAR, obj->mks_obj_id != ID_T_LEVELING))
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  if (TERN1(AUTO_BED_LEVELING_BILINEAR, mks_data(event).mks_obj_id != ID_T_LEVELING))
     lv_clear_tool();
-  switch (obj->mks_obj_id) {
+  switch (mks_data(event).mks_obj_id) {
     case ID_T_PRE_HEAT: lv_draw_preHeat(); break;
     case ID_T_EXTRUCT:  lv_draw_extrusion(); break;
     case ID_T_MOV:      lv_draw_move_motor(); break;

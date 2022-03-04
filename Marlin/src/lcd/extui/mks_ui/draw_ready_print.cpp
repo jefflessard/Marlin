@@ -26,7 +26,6 @@
 
 #include "draw_ready_print.h"
 #include "draw_tool.h"
-#include <lv_conf.h>
 #include "tft_lvgl_configuration.h"
 #include "draw_ui.h"
 
@@ -67,10 +66,10 @@ static lv_obj_t *buttonExt1, *labelExt1, *buttonFanstate, *labelFan;
 
 enum { ID_TOOL = 1, ID_SET, ID_PRINT, ID_INFO_EXT, ID_INFO_BED, ID_INFO_FAN };
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
   lv_clear_ready_print();
-  switch (obj->mks_obj_id) {
+  switch (mks_data(event).mks_obj_id) {
     case ID_TOOL:   lv_draw_tool(); break;
     case ID_SET:    lv_draw_set(); break;
     case ID_INFO_EXT:  uiCfg.curTempType = 0; lv_draw_preHeat(); break;
@@ -83,25 +82,25 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
 lv_obj_t *limit_info, *det_info;
 lv_style_t limit_style, det_style;
 void disp_Limit_ok() {
-  limit_style.text.color.full = 0xFFFF;
-  lv_obj_set_style(limit_info, &limit_style);
+  lv_style_set_text_color(limit_style, 0xFFFF);
+  lv_obj_add_style(limit_info,&tft_style_label_rel,0);
   lv_label_set_text(limit_info, "Limit:ok");
 }
 void disp_Limit_error() {
-  limit_style.text.color.full = 0xF800;
-  lv_obj_set_style(limit_info, &limit_style);
+  lv_style_set_text_color(limit_style, 0xF800);
+  lv_obj_add_style(limit_info,&tft_style_label_rel,0);
   lv_label_set_text(limit_info, "Limit:error");
 }
 
 void disp_det_ok() {
-  det_style.text.color.full = 0xFFFF;
-  lv_obj_set_style(det_info, &det_style);
+  lv_style_set_text_color(limit_style, 0xFFFF);
+  lv_obj_add_style(det_info,&tft_style_label_rel,0);
   lv_label_set_text(det_info, "det:ok");
 }
 
 void disp_det_error() {
-  det_style.text.color.full = 0xF800;
-  lv_obj_set_style(det_info, &det_style);
+  lv_style_set_text_color(limit_style, 0xF800);
+  lv_obj_add_style(det_info,&tft_style_label_rel,0);
   lv_label_set_text(det_info, "det:error");
 }
 
@@ -139,7 +138,7 @@ void lv_draw_ready_print() {
     lv_obj_t *label_tool = lv_label_create_empty(buttonTool);
     if (gCfgItems.multiple_language) {
       lv_label_set_text(label_tool, main_menu.tool);
-      lv_obj_align(label_tool, buttonTool, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(label_tool, buttonTool, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
 
     #if HAS_HOTEND
@@ -167,7 +166,7 @@ void lv_draw_ready_print() {
     limit_style.body.main_color.full = 0x0000;
     limit_style.body.grad_color.full = 0x0000;
     limit_style.text.color.full      = 0xFFFF;
-    lv_obj_set_style(limit_info, &limit_style);
+    lv_obj_add_style(limit_info,&tft_style_label_rel,0);
 
     lv_obj_set_pos(limit_info, 20, 120);
     lv_label_set_text(limit_info, " ");
@@ -178,7 +177,7 @@ void lv_draw_ready_print() {
     det_style.body.main_color.full = 0x0000;
     det_style.body.grad_color.full = 0x0000;
     det_style.text.color.full      = 0xFFFF;
-    lv_obj_set_style(det_info, &det_style);
+    lv_obj_add_style(det_info,&tft_style_label_rel,0);
 
     lv_obj_set_pos(det_info, 20, 145);
     lv_label_set_text(det_info, " ");
@@ -220,22 +219,22 @@ void lv_temp_refr() {
   #if HAS_HOTEND
     sprintf(public_buf_l, printing_menu.temp1, thermalManager.wholeDegHotend(0), thermalManager.degTargetHotend(0));
     lv_label_set_text(labelExt1, public_buf_l);
-    lv_obj_align(labelExt1, buttonExt1, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+    lv_obj_align_to(labelExt1, buttonExt1, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
   #endif
   #if HAS_MULTI_HOTEND
     sprintf(public_buf_l, printing_menu.temp1, thermalManager.wholeDegHotend(1), thermalManager.degTargetHotend(1));
     lv_label_set_text(labelExt2, public_buf_l);
-    lv_obj_align(labelExt2, buttonExt2, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+    lv_obj_align_to(labelExt2, buttonExt2, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
   #endif
   #if HAS_HEATED_BED
     sprintf(public_buf_l, printing_menu.bed_temp, thermalManager.wholeDegBed(), thermalManager.degTargetBed());
     lv_label_set_text(labelBed, public_buf_l);
-    lv_obj_align(labelBed, buttonBedstate, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+    lv_obj_align_to(labelBed, buttonBedstate, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
   #endif
   #if HAS_FAN
     sprintf_P(public_buf_l, PSTR("%d%%"), (int)thermalManager.fanSpeedPercent(0));
     lv_label_set_text(labelFan, public_buf_l);
-    lv_obj_align(labelFan, buttonFanstate, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+    lv_obj_align_to(labelFan, buttonFanstate, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
   #endif
 }
 

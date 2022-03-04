@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 //#include "../lvgl/src/lv_objx/lv_imgbtn.h"
 //#include "../lvgl/src/lv_objx/lv_img.h"
 //#include "../lvgl/src/lv_core/lv_disp.h"
@@ -117,12 +116,12 @@ bool have_pre_pic(char *path) {
   return false;
 }
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
   uint8_t i, file_count = 0;
-  //switch (obj->mks_obj_id)
+  //switch (mks_data(event).mks_obj_id)
   //{
-  if (obj->mks_obj_id == ID_P_UP) {
+  if (mks_data(event).mks_obj_id == ID_P_UP) {
     if (dir_offset[curDirLever].curPage > 0) {
       // 2015.05.19
       list_file.Sd_file_cnt = 0;
@@ -140,7 +139,7 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
       }
     }
   }
-  else if (obj->mks_obj_id == ID_P_DOWN) {
+  else if (mks_data(event).mks_obj_id == ID_P_DOWN) {
     if (dir_offset[curDirLever].cur_page_last_offset > 0) {
       list_file.Sd_file_cnt    = 0;
       list_file.Sd_file_offset = dir_offset[curDirLever].cur_page_last_offset + 1;
@@ -156,7 +155,7 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
         dir_offset[curDirLever].cur_page_last_offset = 0;
     }
   }
-  else if (obj->mks_obj_id == ID_P_RETURN) {
+  else if (mks_data(event).mks_obj_id == ID_P_RETURN) {
     if (curDirLever > 0) {
       int8_t *ch = (int8_t *)strrchr(list_file.curDirPath, '/');
       if (ch) {
@@ -183,7 +182,7 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
   }
   else {
     for (i = 0; i < FILE_BTN_CNT; i++) {
-      if (obj->mks_obj_id == (i + 1)) {
+      if (mks_data(event).mks_obj_id == (i + 1)) {
         if (list_file.file_name[i][0] != 0) {
           if (list_file.IsFolder[i]) {
             strcpy(list_file.curDirPath, list_file.file_name[i]);
@@ -235,13 +234,13 @@ void lv_draw_print_file() {
   /*
   if (gCfgItems.multiple_language) {
     lv_label_set_text(labelPageUp, tool_menu.preheat);
-    lv_obj_align(labelPageUp, buttonPageUp, LV_ALIGN_IN_BOTTOM_MID,0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(labelPageUp, buttonPageUp, LV_ALIGN_BOTTOM_MID,0, BUTTON_TEXT_Y_OFFSET);
 
     lv_label_set_text(labelPageDown, tool_menu.extrude);
-    lv_obj_align(labelPageDown, buttonPageDown, LV_ALIGN_IN_BOTTOM_MID,0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(labelPageDown, buttonPageDown, LV_ALIGN_BOTTOM_MID,0, BUTTON_TEXT_Y_OFFSET);
 
     lv_label_set_text(label_Back, common_menu.text_back);
-    lv_obj_align(label_Back, buttonBack, LV_ALIGN_IN_BOTTOM_MID,0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(label_Back, buttonBack, LV_ALIGN_BOTTOM_MID,0, BUTTON_TEXT_Y_OFFSET);
   }
   */
 }
@@ -272,11 +271,11 @@ void disp_gcode_icon(uint8_t file_num) {
     if (i >= file_num) break;
 
     #ifdef TFT35
-      buttonGcode[i] = lv_imgbtn_create(scr, nullptr);
+      buttonGcode[i] = lv_imgbtn_create(scr);
 
       lv_imgbtn_use_label_style(buttonGcode[i]);
-      lv_obj_clear_protect(buttonGcode[i], LV_PROTECT_FOLLOW);
-      lv_btn_set_layout(buttonGcode[i], LV_LAYOUT_OFF);
+      //TODO upgrade to lvgl8 lv_obj_clear_protect(buttonGcode[i], LV_PROTECT_FOLLOW);
+      lv_obj_set_layout(buttonGcode[i], LV_LAYOUT_FLEX);
 
       ZERO(public_buf_m);
       cutFileName((char *)list_file.long_name[i], 16, 8, (char *)public_buf_m);
@@ -290,7 +289,7 @@ void disp_gcode_icon(uint8_t file_num) {
           lv_obj_set_pos(buttonGcode[i], BTN_X_PIXEL * (i - 3) + INTERVAL_V * ((i - 3) + 1), BTN_Y_PIXEL + INTERVAL_H + titleHeight);
 
         labelPageUp[i] = lv_label_create(buttonGcode[i], public_buf_m);
-        lv_obj_align(labelPageUp[i], buttonGcode[i], LV_ALIGN_IN_BOTTOM_MID, 0, -5);
+        lv_obj_align_to(labelPageUp[i], buttonGcode[i], LV_ALIGN_BOTTOM_MID, 0, -5);
       }
       else {
         if (have_pre_pic((char *)list_file.file_name[i])) {
@@ -305,30 +304,30 @@ void disp_gcode_icon(uint8_t file_num) {
           lv_imgbtn_set_src_both(buttonGcode[i], buttonGcode[i]->mks_pic_name);
           if (i < 3) {
             lv_obj_set_pos(buttonGcode[i], BTN_X_PIXEL * i + INTERVAL_V * (i + 1) + FILE_PRE_PIC_X_OFFSET, titleHeight + FILE_PRE_PIC_Y_OFFSET);
-            buttonText[i] = lv_btn_create(scr, nullptr);
+            buttonText[i] = lv_btn_create(scr);
             //lv_obj_set_event_cb(buttonText[i], event_handler);
 
             lv_btn_use_label_style(buttonText[i]);
-            lv_obj_clear_protect(buttonText[i], LV_PROTECT_FOLLOW);
-            lv_btn_set_layout(buttonText[i], LV_LAYOUT_OFF);
+            //TODO upgrade to lvgl8 lv_obj_clear_protect(buttonText[i], LV_PROTECT_FOLLOW);
+            lv_obj_set_layout(buttonText[i], LV_LAYOUT_FLEX);
             //lv_obj_set_event_cb_mks(buttonText[i], event_handler,(i+10),"", 0);
             lv_obj_set_pos(buttonText[i], BTN_X_PIXEL * i + INTERVAL_V * (i + 1) + FILE_PRE_PIC_X_OFFSET, titleHeight + FILE_PRE_PIC_Y_OFFSET + 100);
             lv_obj_set_size(buttonText[i], 100, 40);
           }
           else {
             lv_obj_set_pos(buttonGcode[i], BTN_X_PIXEL * (i - 3) + INTERVAL_V * ((i - 3) + 1) + FILE_PRE_PIC_X_OFFSET, BTN_Y_PIXEL + INTERVAL_H + titleHeight + FILE_PRE_PIC_Y_OFFSET);
-            buttonText[i] = lv_btn_create(scr, nullptr);
+            buttonText[i] = lv_btn_create(scr);
             //lv_obj_set_event_cb(buttonText[i], event_handler);
 
             lv_btn_use_label_style(buttonText[i]);
-            lv_obj_clear_protect(buttonText[i], LV_PROTECT_FOLLOW);
-            lv_btn_set_layout(buttonText[i], LV_LAYOUT_OFF);
+            //TODO upgrade to lvgl8 lv_obj_clear_protect(buttonText[i], LV_PROTECT_FOLLOW);
+            lv_obj_set_layout(buttonText[i], LV_LAYOUT_FLEX);
             //lv_obj_set_event_cb_mks(buttonText[i], event_handler,(i+10),"", 0);
             lv_obj_set_pos(buttonText[i], BTN_X_PIXEL * (i - 3) + INTERVAL_V * ((i - 3) + 1) + FILE_PRE_PIC_X_OFFSET, BTN_Y_PIXEL + INTERVAL_H + titleHeight + FILE_PRE_PIC_Y_OFFSET + 100);
             lv_obj_set_size(buttonText[i], 100, 40);
           }
           labelPageUp[i] = lv_label_create(buttonText[i], public_buf_m);
-          lv_obj_align(labelPageUp[i], buttonText[i], LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+          lv_obj_align_to(labelPageUp[i], buttonText[i], LV_ALIGN_BOTTOM_MID, 0, 0);
         }
         else {
           lv_obj_set_event_cb_mks(buttonGcode[i], event_handler, (i + 1), "", 0);
@@ -339,7 +338,7 @@ void disp_gcode_icon(uint8_t file_num) {
             lv_obj_set_pos(buttonGcode[i], BTN_X_PIXEL * (i - 3) + INTERVAL_V * ((i - 3) + 1), BTN_Y_PIXEL + INTERVAL_H + titleHeight);
 
           labelPageUp[i] = lv_label_create(buttonGcode[i], public_buf_m);
-          lv_obj_align(labelPageUp[i], buttonGcode[i], LV_ALIGN_IN_BOTTOM_MID, 0, -5);
+          lv_obj_align_to(labelPageUp[i], buttonGcode[i], LV_ALIGN_BOTTOM_MID, 0, -5);
         }
       }
       #if HAS_ROTARY_ENCODER

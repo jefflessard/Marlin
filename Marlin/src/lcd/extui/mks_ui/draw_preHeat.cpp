@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../module/temperature.h"
 #include "../../../inc/MarlinConfig.h"
@@ -55,9 +54,9 @@ enum {
   ID_P_PLA
 };
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  switch (obj->mks_obj_id) {
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  switch (mks_data(event).mks_obj_id) {
     case ID_P_ADD: {
       if (uiCfg.curTempType == 0) {
         #if HAS_HOTEND
@@ -216,7 +215,7 @@ void lv_draw_preHeat() {
   disp_step_heat();
 
   tempText1 = lv_label_create_empty(scr);
-  lv_obj_set_style(tempText1, &tft_style_label_rel);
+  lv_obj_add_style(tempText1,&tft_style_label_rel,0);
   disp_desire_temp();
 }
 
@@ -224,10 +223,10 @@ void disp_ext_heart() {
   btn_abs = lv_btn_create(scr, 160, 40, 80, 40, event_handler, ID_P_ABS);
   btn_pla = lv_btn_create(scr, 260, 40, 80, 40, event_handler, ID_P_PLA);
 
-  lv_btn_set_style(btn_abs, LV_BTN_STYLE_PR, &btn_style_pre);
-  lv_btn_set_style(btn_abs, LV_BTN_STYLE_REL, &btn_style_rel);
-  lv_btn_set_style(btn_pla, LV_BTN_STYLE_PR, &btn_style_pre);
-  lv_btn_set_style(btn_pla, LV_BTN_STYLE_REL, &btn_style_rel);
+  lv_obj_add_style(btn_abs, &btn_style_pre, LV_STATE_PRESSED);
+  lv_obj_add_style(btn_abs, &btn_style_rel, 0);
+  lv_obj_add_style(btn_pla, &btn_style_pre, LV_STATE_PRESSED);
+  lv_obj_add_style(btn_pla, &btn_style_rel, 0);
 
   label_abs = lv_label_create(btn_abs, PREHEAT_2_LABEL);
   label_pla = lv_label_create(btn_pla, PREHEAT_1_LABEL);
@@ -239,14 +238,14 @@ void disp_temp_type() {
       lv_imgbtn_set_src_both(buttonType, "F:/bmp_extru2.bin");
       if (gCfgItems.multiple_language) {
         lv_label_set_text(labelType, preheat_menu.ext2);
-        lv_obj_align(labelType, buttonType, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+        lv_obj_align_to(labelType, buttonType, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
       }
     }
     else if (ENABLED(HAS_HOTEND)) {
       lv_imgbtn_set_src_both(buttonType, "F:/bmp_extru1.bin");
       if (gCfgItems.multiple_language) {
         lv_label_set_text(labelType, preheat_menu.ext1);
-        lv_obj_align(labelType, buttonType, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+        lv_obj_align_to(labelType, buttonType, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
       }
     }
   }
@@ -254,7 +253,7 @@ void disp_temp_type() {
     lv_imgbtn_set_src_both(buttonType, "F:/bmp_bed.bin");
     if (gCfgItems.multiple_language) {
       lv_label_set_text(labelType, preheat_menu.hotbed);
-      lv_obj_align(labelType, buttonType, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelType, buttonType, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
   }
 }
@@ -278,7 +277,7 @@ void disp_desire_temp() {
   strcat_P(public_buf_l, PSTR(": "));
   strcat(public_buf_l, buf);
   lv_label_set_text(tempText1, public_buf_l);
-  lv_obj_align(tempText1, nullptr, LV_ALIGN_CENTER, 0, -50);
+  lv_obj_align_to(tempText1, nullptr, LV_ALIGN_CENTER, 0, -50);
 }
 
 void disp_step_heat() {
@@ -295,15 +294,15 @@ void disp_step_heat() {
   if (gCfgItems.multiple_language) {
     if (uiCfg.stepHeat == 1) {
       lv_label_set_text(labelStep, preheat_menu.step_1c);
-      lv_obj_align(labelStep, buttonStep, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelStep, buttonStep, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
     else if (uiCfg.stepHeat == 5) {
       lv_label_set_text(labelStep, preheat_menu.step_5c);
-      lv_obj_align(labelStep, buttonStep, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelStep, buttonStep, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
     else if (uiCfg.stepHeat == 10) {
       lv_label_set_text(labelStep, preheat_menu.step_10c);
-      lv_obj_align(labelStep, buttonStep, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelStep, buttonStep, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
   }
 }

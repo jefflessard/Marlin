@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../gcode/queue.h"
 #include "../../../gcode/gcode.h"
@@ -58,11 +57,11 @@ enum {
 static float babystep_dist  = 0.01;
 static uint8_t has_adjust_z = 0;
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
   char baby_buf[30] = { 0 };
   char str_1[16];
-  switch (obj->mks_obj_id) {
+  switch (mks_data(event).mks_obj_id) {
     case ID_BABYSTEP_X_P:
       sprintf_P(baby_buf, PSTR("M290 X%s"), dtostrf(babystep_dist, 1, 3, str_1));
       gcode.process_subcommands_now(F(baby_buf));
@@ -146,15 +145,15 @@ void disp_baby_step_dist() {
   if (gCfgItems.multiple_language) {
     if ((int)(100 * babystep_dist) == 1) {
       lv_label_set_text(labelV, move_menu.step_001mm);
-      lv_obj_align(labelV, buttonV, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelV, buttonV, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
     else if ((int)(100 * babystep_dist) == 5) {
       lv_label_set_text(labelV, move_menu.step_005mm);
-      lv_obj_align(labelV, buttonV, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelV, buttonV, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
     else if ((int)(100 * babystep_dist) == 10) {
       lv_label_set_text(labelV, move_menu.step_01mm);
-      lv_obj_align(labelV, buttonV, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelV, buttonV, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
   }
 }

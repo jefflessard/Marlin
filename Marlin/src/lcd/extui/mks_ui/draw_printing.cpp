@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../MarlinCore.h" // for marlin_state
 #include "../../../module/temperature.h"
@@ -74,10 +73,10 @@ bool once_flag; // = false
 extern bool flash_preview_begin, default_preview_flg, gcode_preview_over;
 extern uint32_t To_pre_view;
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
   if (gcode_preview_over) return;
-  switch (obj->mks_obj_id) {
+  switch (mks_data(event).mks_obj_id) {
     case ID_PAUSE:
       if (uiCfg.print_state == WORKING) {
         #if ENABLED(SDSUPPORT)
@@ -87,20 +86,20 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
         #endif
         lv_imgbtn_set_src_both(buttonPause, "F:/bmp_resume.bin");
         lv_label_set_text(labelPause, printing_menu.resume);
-        lv_obj_align(labelPause, buttonPause, LV_ALIGN_CENTER, 30, 0);
+        lv_obj_align_to(labelPause, buttonPause, LV_ALIGN_CENTER, 30, 0);
       }
       else if (uiCfg.print_state == PAUSED) {
         uiCfg.print_state = RESUMING;
-        lv_imgbtn_set_src_both(obj, "F:/bmp_pause.bin");
+        lv_imgbtn_set_src_both(lv_event_get_target(event), "F:/bmp_pause.bin");
         lv_label_set_text(labelPause, printing_menu.pause);
-        lv_obj_align(labelPause, buttonPause, LV_ALIGN_CENTER, 30, 0);
+        lv_obj_align_to(labelPause, buttonPause, LV_ALIGN_CENTER, 30, 0);
       }
       #if ENABLED(POWER_LOSS_RECOVERY)
         else if (uiCfg.print_state == REPRINTING) {
           uiCfg.print_state = REPRINTED;
-          lv_imgbtn_set_src_both(obj, "F:/bmp_pause.bin");
+          lv_imgbtn_set_src_both(lv_event_get_target(event), "F:/bmp_pause.bin");
           lv_label_set_text(labelPause, printing_menu.pause);
-          lv_obj_align(labelPause, buttonPause, LV_ALIGN_CENTER, 30, 0);
+          lv_obj_align_to(labelPause, buttonPause, LV_ALIGN_CENTER, 30, 0);
           print_time.minutes = recovery.info.print_job_elapsed / 60;
           print_time.seconds = recovery.info.print_job_elapsed % 60;
           print_time.hours   = print_time.minutes / 60;
@@ -154,7 +153,7 @@ void lv_draw_printing() {
 
   buttonFanstate = lv_imgbtn_create(scr, "F:/bmp_fan_state.bin", 350, 186, event_handler, ID_FAN);
 
-  lv_obj_t *buttonTime = lv_img_create(scr, nullptr);
+  lv_obj_t *buttonTime = lv_img_create(scr);
   lv_img_set_src(buttonTime, "F:/bmp_time_state.bin");
   lv_obj_set_pos(buttonTime, 206, 86);
 
@@ -195,24 +194,24 @@ void lv_draw_printing() {
 
   if (gCfgItems.multiple_language) {
     lv_label_set_text(labelPause, uiCfg.print_state == WORKING ? printing_menu.pause : printing_menu.resume);
-    lv_obj_align(labelPause, buttonPause, LV_ALIGN_CENTER, 20, 0);
+    lv_obj_align_to(labelPause, buttonPause, LV_ALIGN_CENTER, 20, 0);
 
     lv_label_set_text(labelStop, printing_menu.stop);
-    lv_obj_align(labelStop, buttonStop, LV_ALIGN_CENTER, 20, 0);
+    lv_obj_align_to(labelStop, buttonStop, LV_ALIGN_CENTER, 20, 0);
 
     lv_label_set_text(labelOperat, printing_menu.option);
-    lv_obj_align(labelOperat, buttonOperat, LV_ALIGN_CENTER, 20, 0);
+    lv_obj_align_to(labelOperat, buttonOperat, LV_ALIGN_CENTER, 20, 0);
   }
 
-  bar1 = lv_bar_create(scr, nullptr);
+  bar1 = lv_bar_create(scr);
   lv_obj_set_pos(bar1, 205, 36);
   lv_obj_set_size(bar1, 270, 40);
-  lv_bar_set_style(bar1, LV_BAR_STYLE_INDIC, &lv_bar_style_indic);
-  lv_bar_set_anim_time(bar1, 1000);
+  lv_obj_add_style(bar1, &lv_bar_style_indic, LV_PART_INDICATOR);
+  //TODO upgrade to lvgl8 lv_bar_set_anim_time(bar1, 1000);
   lv_bar_set_value(bar1, 0, LV_ANIM_ON);
   bar1ValueText = lv_label_create_empty(bar1);
   lv_label_set_text(bar1ValueText, "0%");
-  lv_obj_align(bar1ValueText, bar1, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_align_to(bar1ValueText, bar1, LV_ALIGN_CENTER, 0, 0);
 
   disp_ext_temp();
   disp_bed_temp();
@@ -292,7 +291,7 @@ void setProBarRate() {
     lv_bar_set_value(bar1, rate, LV_ANIM_ON);
     sprintf_P(public_buf_l, "%d%%", rate);
     lv_label_set_text(bar1ValueText, public_buf_l);
-    lv_obj_align(bar1ValueText, bar1, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align_to(bar1ValueText, bar1, LV_ALIGN_CENTER, 0, 0);
 
     if (marlin_state == MF_SD_COMPLETE) {
       if (once_flag == 0) {

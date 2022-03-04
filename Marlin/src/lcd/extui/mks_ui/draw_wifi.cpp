@@ -24,7 +24,6 @@
 
 #if HAS_TFT_LVGL_UI
 
-#include <lv_conf.h>
 #include "tft_lvgl_configuration.h"
 
 #if ENABLED(MKS_WIFI_MODULE)
@@ -40,10 +39,10 @@ enum {
   ID_W_RECONNECT
 };
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
   clear_cur_ui();
-  switch (obj->mks_obj_id) {
+  switch (mks_data(event).mks_obj_id) {
     case ID_W_RETURN:
       lv_draw_set();
       break;
@@ -93,23 +92,23 @@ void lv_draw_wifi() {
     if (gCfgItems.wifi_mode_sel == STA_MODEL) {
       if (gCfgItems.cloud_enable) {
         lv_label_set_text(label_Cloud, wifi_menu.cloud);
-        lv_obj_align(label_Cloud, buttonCloud, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+        lv_obj_align_to(label_Cloud, buttonCloud, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
       }
       lv_label_set_text(label_Reconnect, wifi_menu.reconnect);
-      lv_obj_align(label_Reconnect, buttonReconnect, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(label_Reconnect, buttonReconnect, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
     lv_label_set_text(label_Back, common_menu.text_back);
-    lv_obj_align(label_Back, buttonBack, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(label_Back, buttonBack, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
   }
 
   wifi_ip_text = lv_label_create_empty(scr);
-  lv_obj_set_style(wifi_ip_text, &tft_style_label_rel);
+  lv_obj_add_style(wifi_ip_text,&tft_style_label_rel,0);
   wifi_name_text = lv_label_create_empty(scr);
-  lv_obj_set_style(wifi_name_text, &tft_style_label_rel);
+  lv_obj_add_style(wifi_name_text,&tft_style_label_rel,0);
   wifi_key_text = lv_label_create_empty(scr);
-  lv_obj_set_style(wifi_key_text, &tft_style_label_rel);
+  lv_obj_add_style(wifi_key_text,&tft_style_label_rel,0);
   wifi_state_text = lv_label_create_empty(scr);
-  lv_obj_set_style(wifi_state_text, &tft_style_label_rel);
+  lv_obj_add_style(wifi_state_text,&tft_style_label_rel,0);
 
   disp_wifi_state();
 }
@@ -118,18 +117,18 @@ void disp_wifi_state() {
   strcpy(public_buf_m, wifi_menu.ip);
   strcat(public_buf_m, ipPara.ip_addr);
   lv_label_set_text(wifi_ip_text, public_buf_m);
-  lv_obj_align(wifi_ip_text, nullptr, LV_ALIGN_CENTER, 0, -100);
+  lv_obj_align_to(wifi_ip_text, nullptr, LV_ALIGN_CENTER, 0, -100);
 
   strcpy(public_buf_m, wifi_menu.wifi);
   strcat(public_buf_m, wifiPara.ap_name);
   lv_label_set_text(wifi_name_text, public_buf_m);
-  lv_obj_align(wifi_name_text, nullptr, LV_ALIGN_CENTER, 0, -70);
+  lv_obj_align_to(wifi_name_text, nullptr, LV_ALIGN_CENTER, 0, -70);
 
   if (wifiPara.mode == AP_MODEL) {
     strcpy(public_buf_m, wifi_menu.key);
     strcat(public_buf_m, wifiPara.keyCode);
     lv_label_set_text(wifi_key_text, public_buf_m);
-    lv_obj_align(wifi_key_text, nullptr, LV_ALIGN_CENTER, 0, -40);
+    lv_obj_align_to(wifi_key_text, nullptr, LV_ALIGN_CENTER, 0, -40);
 
     strcpy(public_buf_m, wifi_menu.state_ap);
     if (wifi_link_state == WIFI_CONNECTED)
@@ -139,7 +138,7 @@ void disp_wifi_state() {
     else
       strcat(public_buf_m, wifi_menu.exception);
     lv_label_set_text(wifi_state_text, public_buf_m);
-    lv_obj_align(wifi_state_text, nullptr, LV_ALIGN_CENTER, 0, -10);
+    lv_obj_align_to(wifi_state_text, nullptr, LV_ALIGN_CENTER, 0, -10);
   }
   else {
     strcpy(public_buf_m, wifi_menu.state_sta);
@@ -150,10 +149,10 @@ void disp_wifi_state() {
     else
       strcat(public_buf_m, wifi_menu.exception);
     lv_label_set_text(wifi_state_text, public_buf_m);
-    lv_obj_align(wifi_state_text, nullptr, LV_ALIGN_CENTER, 0, -40);
+    lv_obj_align_to(wifi_state_text, nullptr, LV_ALIGN_CENTER, 0, -40);
 
     lv_label_set_text(wifi_key_text, "");
-    lv_obj_align(wifi_key_text, nullptr, LV_ALIGN_CENTER, 0, -10);
+    lv_obj_align_to(wifi_key_text, nullptr, LV_ALIGN_CENTER, 0, -10);
   }
 }
 

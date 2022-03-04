@@ -429,6 +429,7 @@ typedef enum {
 } keyboard_value_state;
 extern keyboard_value_state keyboard_value;
 
+
 extern CFG_ITMES gCfgItems;
 extern UI_CFG uiCfg;
 extern DISP_STATE disp_state;
@@ -480,6 +481,15 @@ void lv_ex_line(lv_obj_t *line, lv_point_t *points);
 #ifdef __cplusplus
   } /* C-declarations for C++ */
 #endif
+
+typedef struct {
+  uint8_t IsGcode;
+	uint16_t mks_obj_id;
+	char mks_pic_name[255];
+	uint32_t pic_addr;
+} MKS_DATA;
+MKS_DATA mks_data(lv_event_t *e);
+void lv_obj_set_event_cb_mks(lv_obj_t * obj, lv_event_cb_t event_cb,uint16_t id,const char *pic_file_name,uint8_t is_code);
 
 // Set the same image for both Released and Pressed
 void lv_imgbtn_set_src_both(lv_obj_t *imgbtn, const void *src);

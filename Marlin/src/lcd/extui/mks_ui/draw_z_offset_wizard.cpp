@@ -25,7 +25,6 @@
 #if BOTH(HAS_TFT_LVGL_UI, PROBE_OFFSET_WIZARD)
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../gcode/queue.h"
 #include "../../../module/motion.h"
@@ -69,14 +68,14 @@ void disp_cur_wizard_pos() {
   if (labelP_z_offset_ref) lv_label_set_text(labelP_z_offset_ref, public_buf_l);
 }
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
+static void event_handler(lv_event_t *event) {
   char str_1[16];
-  if (event != LV_EVENT_RELEASED) return;
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
   //lv_clear_z_offset_wizard();
   if (!queue.ring_buffer.full(3)) {
     bool do_inject = true;
     float dist = uiCfg.move_dist;
-    switch (obj->mks_obj_id) {
+    switch (mks_data(event).mks_obj_id) {
       case ID_M_Z_N: dist *= -1; case ID_M_Z_P: cur_label = 'Z'; break;
       default: do_inject = false;
     }
@@ -88,7 +87,7 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
     }
   }
 
-  switch (obj->mks_obj_id) {
+  switch (mks_data(event).mks_obj_id) {
     case ID_M_STEP:
       if (ABS((int)(10 * uiCfg.move_dist)) == 10)
         uiCfg.move_dist = 0.025;
@@ -162,7 +161,7 @@ void lv_draw_z_offset_wizard() {
   scr = lv_screen_create(Z_OFFSET_WIZARD_UI, machine_menu.LevelingZoffsetTitle);
 
   lv_obj_t *buttonXI = lv_big_button_create(scr, "F:/bmp_zAdd.bin", move_menu.z_add, INTERVAL_V, titleHeight, event_handler, ID_M_Z_P);
-  lv_obj_clear_protect(buttonXI, LV_PROTECT_FOLLOW);
+  //TODO upgrade to lvgl8 lv_obj_clear_protect(buttonXI, LV_PROTECT_FOLLOW);
   lv_big_button_create(scr, "F:/bmp_zDec.bin", move_menu.z_dec, INTERVAL_V * 3, BTN_Y_PIXEL + INTERVAL_H + titleHeight, event_handler, ID_M_Z_N);
 
   // button with image and label changed dynamically by disp_move_dist
@@ -205,15 +204,15 @@ void disp_move_wizard_dist() {
   if (gCfgItems.multiple_language) {
     if ((int)(1000 * uiCfg.move_dist) == 25) {
       lv_label_set_text(labelV, move_menu.step_0025mm);
-      lv_obj_align(labelV, buttonV, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelV, buttonV, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
     else if ((int)(10 * uiCfg.move_dist) == 1) {
       lv_label_set_text(labelV, move_menu.step_01mm);
-      lv_obj_align(labelV, buttonV, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelV, buttonV, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
     else if ((int)(10 * uiCfg.move_dist) == 10) {
       lv_label_set_text(labelV, move_menu.step_1mm);
-      lv_obj_align(labelV, buttonV, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelV, buttonV, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
   }
 }

@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../inc/MarlinConfig.h"
 
@@ -39,10 +38,10 @@ enum {
   ID_MACHINE_JERK
 };
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
   clear_cur_ui();
-  switch (obj->mks_obj_id) {
+  switch (mks_data(event).mks_obj_id) {
     case ID_MACHINE_RETURN:       draw_return_ui(); break;
     case ID_MACHINE_ACCELERATION: lv_draw_acceleration_settings(); break;
     case ID_MACHINE_FEEDRATE:     lv_draw_max_feedrate_settings(); break;

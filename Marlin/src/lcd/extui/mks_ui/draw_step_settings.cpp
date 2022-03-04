@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../module/planner.h"
 #include "../../../inc/MarlinConfig.h"
@@ -44,10 +43,10 @@ enum {
   ID_STEP_UP
 };
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
   lv_clear_step_settings();
-  switch (obj->mks_obj_id) {
+  switch (mks_data(event).mks_obj_id) {
     case ID_STEP_RETURN:
       uiCfg.para_ui_page = false;
       draw_return_ui();

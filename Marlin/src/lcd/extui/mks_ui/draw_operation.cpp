@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../module/temperature.h"
 #include "../../../module/motion.h"
@@ -50,9 +49,9 @@ enum {
 static lv_obj_t *label_PowerOff;
 static lv_obj_t *buttonPowerOff;
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  switch (obj->mks_obj_id) {
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  switch (mks_data(event).mks_obj_id) {
     case ID_O_PRE_HEAT:
       lv_clear_operation();
       lv_draw_preHeat();
@@ -103,8 +102,8 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
         lv_imgbtn_set_src_both(buttonPowerOff, "F:/bmp_auto_off.bin");
         lv_label_set_text(label_PowerOff, printing_more_menu.auto_close);
       }
-      lv_obj_align(label_PowerOff, buttonPowerOff, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
-      lv_obj_refresh_ext_draw_pad(label_PowerOff);
+      lv_obj_align_to(label_PowerOff, buttonPowerOff, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      //TODO upgrade to lvgl8 lv_obj_refresh_ext_draw_pad(label_PowerOff);
       update_spi_flash();
       break;
     case ID_O_BABY_STEP:
@@ -185,37 +184,37 @@ void lv_draw_operation() {
 
   if (gCfgItems.multiple_language) {
     lv_label_set_text(labelPreHeat, operation_menu.temp);
-    lv_obj_align(labelPreHeat, buttonPreHeat, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(labelPreHeat, buttonPreHeat, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
 
     lv_label_set_text(label_Filament, operation_menu.filament);
-    lv_obj_align(label_Filament, buttonFilament, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(label_Filament, buttonFilament, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
 
     lv_label_set_text(label_Fan, operation_menu.fan);
-    lv_obj_align(label_Fan, buttonFan, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(label_Fan, buttonFan, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
 
     if (gCfgItems.finish_power_off)
       lv_label_set_text(label_PowerOff, printing_more_menu.auto_close);
     else
       lv_label_set_text(label_PowerOff, printing_more_menu.manual);
-    lv_obj_align(label_PowerOff, buttonPowerOff, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(label_PowerOff, buttonPowerOff, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
 
     if (uiCfg.print_state != WORKING) {
       lv_label_set_text(labelExtrusion, operation_menu.extr);
-      lv_obj_align(labelExtrusion, buttonExtrusion, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelExtrusion, buttonExtrusion, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
 
       lv_label_set_text(label_Move, operation_menu.move);
-      lv_obj_align(label_Move, buttonMove, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(label_Move, buttonMove, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
     else {
       lv_label_set_text(label_Speed, operation_menu.speed);
-      lv_obj_align(label_Speed, buttonSpeed, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(label_Speed, buttonSpeed, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
 
       lv_label_set_text(label_BabyStep, operation_menu.babystep);
-      lv_obj_align(label_BabyStep, buttonBabyStep, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(label_BabyStep, buttonBabyStep, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
 
     lv_label_set_text(label_Back, common_menu.text_back);
-    lv_obj_align(label_Back, buttonBack, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(label_Back, buttonBack, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
   }
 }
 

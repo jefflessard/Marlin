@@ -27,7 +27,6 @@
 #include "draw_ready_print.h"
 #include "draw_set.h"
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "pic_manager.h"
 
@@ -53,15 +52,15 @@ enum {
   ID_S_RETURN
 };
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  if (obj->mks_obj_id == ID_S_CONTINUE) return;
-  if (obj->mks_obj_id == ID_S_MOTOR_OFF) {
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  if (mks_data(event).mks_obj_id == ID_S_CONTINUE) return;
+  if (mks_data(event).mks_obj_id == ID_S_MOTOR_OFF) {
     TERN(HAS_SUICIDE, suicide(), queue.enqueue_now(F("M84")));
     return;
   }
   lv_clear_set();
-  switch (obj->mks_obj_id) {
+  switch (mks_data(event).mks_obj_id) {
     case ID_S_FAN:
       lv_draw_fan();
       break;

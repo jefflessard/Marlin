@@ -24,7 +24,6 @@
 #if BOTH(HAS_TFT_LVGL_UI, MULTI_VOLUME)
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../inc/MarlinConfig.h"
 #include "../../../sd/cardreader.h"
@@ -42,10 +41,10 @@ enum {
   extern uint8_t current_disp_ui;
 #endif
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
   lv_clear_media_select();
-  switch (obj->mks_obj_id) {
+  switch (mks_data(event).mks_obj_id) {
     case ID_T_USB_DISK: card.changeMedia(&card.media_driver_usbFlash); break;
     case ID_T_SD_DISK:  card.changeMedia(&card.media_driver_sdcard); break;
     case ID_T_RETURN:

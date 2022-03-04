@@ -29,7 +29,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../sd/cardreader.h"
 #include "../../../gcode/queue.h"
@@ -72,8 +71,8 @@ extern bool temps_update_flag;
 #define BTN_OK_Y      180
 #define BTN_CANCEL_Y  180
 
-static void btn_ok_event_cb(lv_obj_t *btn, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void btn_ok_event_cb(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
   if (DIALOG_IS(TYPE_PRINT_FILE)) {
     #if HAS_GCODE_PREVIEW
       preview_gcode_prehandle(list_file.file_name[sel_id]);
@@ -183,8 +182,8 @@ static void btn_ok_event_cb(lv_obj_t *btn, lv_event_t event) {
   }
 }
 
-static void btn_cancel_event_cb(lv_obj_t *btn, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void btn_cancel_event_cb(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
   if (DIALOG_IS(PAUSE_MESSAGE_OPTION)) {
     TERN_(ADVANCED_PAUSE_FEATURE, pause_menu_response = PAUSE_RESPONSE_RESUME_PRINT);
   }
@@ -274,11 +273,11 @@ void lv_draw_dialog(uint8_t type) {
     lv_obj_t *labelCancel = lv_label_create_empty(btnCancel);
     lv_label_set_text(labelCancel, print_file_dialog_menu.cancel);
 
-    filament_bar = lv_bar_create(scr, nullptr);
+    filament_bar = lv_bar_create(scr);
     lv_obj_set_pos(filament_bar, (TFT_WIDTH - 400) / 2, ((TFT_HEIGHT - titleHeight) - 40) / 2);
     lv_obj_set_size(filament_bar, 400, 25);
-    lv_bar_set_style(filament_bar, LV_BAR_STYLE_INDIC, &lv_bar_style_indic);
-    lv_bar_set_anim_time(filament_bar, 1000);
+    lv_obj_add_style(filament_bar, &lv_bar_style_indic, LV_PART_INDICATOR);
+    //TODO upgrade to lvgl8 lv_bar_set_anim_time(filament_bar, 1000);
     lv_bar_set_value(filament_bar, 0, LV_ANIM_ON);
   }
   else {
@@ -299,96 +298,96 @@ void lv_draw_dialog(uint8_t type) {
   }
   if (DIALOG_IS(TYPE_PRINT_FILE)) {
     lv_label_set_text(labelDialog, print_file_dialog_menu.print_file);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
 
     lv_obj_t *labelFile = lv_label_create(scr, list_file.long_name[sel_id]);
-    lv_obj_align(labelFile, nullptr, LV_ALIGN_CENTER, 0, -60);
+    lv_obj_align_to(labelFile, nullptr, LV_ALIGN_CENTER, 0, -60);
   }
   else if (DIALOG_IS(TYPE_STOP)) {
     lv_label_set_text(labelDialog, print_file_dialog_menu.cancel_print);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(TYPE_FINISH_PRINT)) {
     lv_label_set_text(labelDialog, print_file_dialog_menu.print_finish);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_PARKING)) {
     lv_label_set_text(labelDialog, pause_msg_menu.pausing);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_CHANGING)) {
     lv_label_set_text(labelDialog, pause_msg_menu.changing);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_UNLOAD)) {
     lv_label_set_text(labelDialog, pause_msg_menu.unload);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_WAITING)) {
     lv_label_set_text(labelDialog, pause_msg_menu.waiting);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_INSERT)) {
     lv_label_set_text(labelDialog, pause_msg_menu.insert);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_LOAD)) {
     lv_label_set_text(labelDialog, pause_msg_menu.load);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_PURGE)) {
     lv_label_set_text(labelDialog, pause_msg_menu.purge);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_RESUME)) {
     lv_label_set_text(labelDialog, pause_msg_menu.resume);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_HEAT)) {
     lv_label_set_text(labelDialog, pause_msg_menu.heat);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_HEATING)) {
     lv_label_set_text(labelDialog, pause_msg_menu.heating);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_OPTION)) {
     lv_label_set_text(labelDialog, pause_msg_menu.option);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(STORE_EEPROM_TIPS)) {
     lv_label_set_text(labelDialog, eeprom_menu.storeTips);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(READ_EEPROM_TIPS)) {
     lv_label_set_text(labelDialog, eeprom_menu.readTips);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(REVERT_EEPROM_TIPS)) {
     lv_label_set_text(labelDialog, eeprom_menu.revertTips);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(WIFI_CONFIG_TIPS)) {
     lv_label_set_text(labelDialog, machine_menu.wifiConfigTips);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(WIFI_ENABLE_TIPS)) {
     lv_label_set_text(labelDialog, print_file_dialog_menu.wifi_enable_tips);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(TRANSFER_NO_DEVICE)) {
     lv_label_set_text(labelDialog, DIALOG_UPDATE_NO_DEVICE_EN);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   #if ENABLED(MKS_WIFI_MODULE)
     else if (DIALOG_IS(TYPE_UPLOAD_FILE)) {
       if (upload_result == 1) {
         lv_label_set_text(labelDialog, DIALOG_UPLOAD_ING_EN);
-        lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+        lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
       }
       else if (upload_result == 2) {
         lv_label_set_text(labelDialog, DIALOG_UPLOAD_ERROR_EN);
-        lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+        lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
       }
       else if (upload_result == 3) {
         char buf[200];
@@ -414,50 +413,50 @@ void lv_draw_dialog(uint8_t type) {
         sprintf_P(&buf[_index], PSTR(" %d KBytes/s\n"), (int)(upload_size / upload_time_sec / 1024));
 
         lv_label_set_text(labelDialog, buf);
-        lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+        lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
       }
     }
     else if (DIALOG_IS(TYPE_UPDATE_ESP_FIRMWARE)) {
       lv_label_set_text(labelDialog, DIALOG_UPDATE_WIFI_FIRMWARE_EN);
-      lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+      lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
     }
   #endif // MKS_WIFI_MODULE
   else if (DIALOG_IS(TYPE_FILAMENT_LOAD_HEAT)) {
     lv_label_set_text(labelDialog, filament_menu.filament_dialog_load_heat);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(TYPE_FILAMENT_HEAT_LOAD_COMPLETED)) {
     lv_label_set_text(labelDialog, filament_menu.filament_dialog_load_heat_confirm);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(TYPE_FILAMENT_UNLOAD_HEAT)) {
     lv_label_set_text(labelDialog, filament_menu.filament_dialog_unload_heat);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(TYPE_FILAMENT_HEAT_UNLOAD_COMPLETED)) {
     lv_label_set_text(labelDialog, filament_menu.filament_dialog_unload_heat_confirm);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(TYPE_FILAMENT_LOAD_COMPLETED)) {
     lv_label_set_text(labelDialog, filament_menu.filament_dialog_load_completed);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(TYPE_FILAMENT_UNLOAD_COMPLETED)) {
     lv_label_set_text(labelDialog, filament_menu.filament_dialog_unload_completed);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(TYPE_FILAMENT_LOADING)) {
     lv_label_set_text(labelDialog, filament_menu.filament_dialog_loading);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -70);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -70);
   }
   else if (DIALOG_IS(TYPE_FILAMENT_UNLOADING)) {
     lv_label_set_text(labelDialog, filament_menu.filament_dialog_unloading);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -70);
+    lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -70);
   }
   #if ENABLED(MKS_WIFI_MODULE)
     else if (DIALOG_IS(TYPE_UNBIND)) {
       lv_label_set_text(labelDialog, common_menu.unbind_printer_tips);
-      lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -70);
+      lv_obj_align_to(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -70);
     }
   #endif
   #if HAS_ROTARY_ENCODER
@@ -476,7 +475,7 @@ void filament_sprayer_temp() {
   strcat_P(public_buf_l, PSTR(": "));
   strcat(public_buf_l, buf);
   lv_label_set_text(tempText1, public_buf_l);
-  lv_obj_align(tempText1, nullptr, LV_ALIGN_CENTER, 0, -50);
+  lv_obj_align_to(tempText1, nullptr, LV_ALIGN_CENTER, 0, -50);
 }
 
 void filament_dialog_handle() {

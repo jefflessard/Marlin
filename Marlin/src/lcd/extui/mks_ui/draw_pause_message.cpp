@@ -25,7 +25,6 @@
 #if BOTH(HAS_TFT_LVGL_UI, ADVANCED_PAUSE_FEATURE)
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../feature/pause.h"
 #include "../../../inc/MarlinConfig.h"

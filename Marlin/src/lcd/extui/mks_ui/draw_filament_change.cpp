@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../module/temperature.h"
 #include "../../../gcode/gcode.h"
@@ -46,9 +45,9 @@ enum {
   ID_FILAMNT_RETURN
 };
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  switch (obj->mks_obj_id) {
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  switch (mks_data(event).mks_obj_id) {
     case ID_FILAMNT_IN:
       uiCfg.filament_load_heat_flg = true;
       if (ABS(thermalManager.degTargetHotend(uiCfg.extruderIndex) - thermalManager.wholeDegHotend(uiCfg.extruderIndex)) <= 1
@@ -110,7 +109,7 @@ void lv_draw_filament_change() {
   scr = lv_screen_create(FILAMENTCHANGE_UI);
   // Create an Image button
   lv_obj_t *buttonIn = lv_big_button_create(scr, "F:/bmp_in.bin", filament_menu.in, INTERVAL_V, titleHeight, event_handler, ID_FILAMNT_IN);
-  lv_obj_clear_protect(buttonIn, LV_PROTECT_FOLLOW);
+  //TODO upgrade to lvgl8 lv_obj_clear_protect(buttonIn, LV_PROTECT_FOLLOW);
   lv_big_button_create(scr, "F:/bmp_out.bin", filament_menu.out, BTN_X_PIXEL * 3 + INTERVAL_V * 4, titleHeight, event_handler, ID_FILAMNT_OUT);
 
   buttonType = lv_imgbtn_create(scr, nullptr, INTERVAL_V, BTN_Y_PIXEL + INTERVAL_H + titleHeight, event_handler, ID_FILAMNT_TYPE);
@@ -127,7 +126,7 @@ void lv_draw_filament_change() {
   disp_filament_type();
 
   tempText1 = lv_label_create_empty(scr);
-  lv_obj_set_style(tempText1, &tft_style_label_rel);
+  lv_obj_add_style(tempText1, &tft_style_label_rel,0);
   disp_filament_temp();
 }
 
@@ -136,14 +135,14 @@ void disp_filament_type() {
     lv_imgbtn_set_src_both(buttonType, "F:/bmp_extru2.bin");
     if (gCfgItems.multiple_language) {
       lv_label_set_text(labelType, preheat_menu.ext2);
-      lv_obj_align(labelType, buttonType, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelType, buttonType, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
   }
   else {
     lv_imgbtn_set_src_both(buttonType, "F:/bmp_extru1.bin");
     if (gCfgItems.multiple_language) {
       lv_label_set_text(labelType, preheat_menu.ext1);
-      lv_obj_align(labelType, buttonType, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelType, buttonType, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
   }
 }
@@ -159,7 +158,7 @@ void disp_filament_temp() {
   strcat_P(public_buf_l, PSTR(": "));
   strcat(public_buf_l, buf);
   lv_label_set_text(tempText1, public_buf_l);
-  lv_obj_align(tempText1, nullptr, LV_ALIGN_CENTER, 0, -50);
+  lv_obj_align_to(tempText1, nullptr, LV_ALIGN_CENTER, 0, -50);
 }
 
 void lv_clear_filament_change() {

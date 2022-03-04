@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../module/planner.h"
 #include "../../../inc/MarlinConfig.h"
@@ -47,9 +46,9 @@ enum {
 
 static bool editingFlowrate;
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  switch (obj->mks_obj_id) {
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  switch (mks_data(event).mks_obj_id) {
     case ID_C_ADD:
       if (!editingFlowrate) {
         if (feedrate_percentage < MAX_EXT_SPEED_PERCENT - uiCfg.stepPrintSpeed)
@@ -149,7 +148,7 @@ void lv_draw_change_speed() {
   disp_speed_step();
 
   printSpeedText = lv_label_create_empty(scr);
-  lv_obj_set_style(printSpeedText, &tft_style_label_rel);
+  lv_obj_add_style(printSpeedText, &tft_style_label_rel, 0);
   disp_print_speed();
 }
 
@@ -164,15 +163,15 @@ void disp_speed_step() {
   if (gCfgItems.multiple_language) {
     if (uiCfg.stepPrintSpeed == 1) {
       lv_label_set_text(labelStep, speed_menu.step_1percent);
-      lv_obj_align(labelStep, buttonStep, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelStep, buttonStep, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
     else if (uiCfg.stepPrintSpeed == 5) {
       lv_label_set_text(labelStep, speed_menu.step_5percent);
-      lv_obj_align(labelStep, buttonStep, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelStep, buttonStep, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
     else if (uiCfg.stepPrintSpeed == 10) {
       lv_label_set_text(labelStep, speed_menu.step_10percent);
-      lv_obj_align(labelStep, buttonStep, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelStep, buttonStep, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     }
   }
 }
@@ -197,21 +196,21 @@ void disp_print_speed() {
   sprintf_P(buf, PSTR("%d%%"), val);
   strcat(public_buf_l, buf);
   lv_label_set_text(printSpeedText, public_buf_l);
-  lv_obj_align(printSpeedText, nullptr, LV_ALIGN_CENTER, 0, -65);
+  lv_obj_align_to(printSpeedText, nullptr, LV_ALIGN_CENTER, 0, -65);
 }
 
 void disp_speed_type() {
   lv_imgbtn_set_src_both(buttonMov, editingFlowrate ? "F:/bmp_mov_changeSpeed.bin" : "F:/bmp_mov_sel.bin");
   lv_imgbtn_set_src_both(buttonExt, editingFlowrate ? "F:/bmp_extruct_sel.bin" : "F:/bmp_speed_extruct.bin");
-  lv_obj_refresh_ext_draw_pad(buttonExt);
-  lv_obj_refresh_ext_draw_pad(buttonMov);
+  //TODO upgrade to lvgl8 lv_obj_refresh_ext_draw_pad(buttonExt);
+  //TODO upgrade to lvgl8 lv_obj_refresh_ext_draw_pad(buttonMov);
 
   if (gCfgItems.multiple_language) {
     lv_label_set_text(labelMov, speed_menu.move);
-    lv_obj_align(labelMov, buttonMov, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(labelMov, buttonMov, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
 
     lv_label_set_text(labelExt, speed_menu.extrude);
-    lv_obj_align(labelExt, buttonExt, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(labelExt, buttonExt, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
   }
 }
 

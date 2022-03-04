@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../module/temperature.h"
 #include "../../../gcode/queue.h"
@@ -51,9 +50,9 @@ enum {
 
 static int32_t extrudeAmount;
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  switch (obj->mks_obj_id) {
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  switch (mks_data(event).mks_obj_id) {
     case ID_E_ADD:
       if (thermalManager.hotEnoughToExtrude(uiCfg.extruderIndex)) {
         sprintf_P((char *)public_buf_l, PSTR("G91\nG1 E%d F%d\nG90"), uiCfg.extruStep, 60 * uiCfg.extruSpeed);
@@ -115,7 +114,7 @@ void lv_draw_extrusion() {
   scr = lv_screen_create(EXTRUSION_UI);
   // Create image buttons
   lv_obj_t *buttonAdd = lv_big_button_create(scr, "F:/bmp_in.bin", extrude_menu.in, INTERVAL_V, titleHeight, event_handler, ID_E_ADD);
-  lv_obj_clear_protect(buttonAdd, LV_PROTECT_FOLLOW);
+  //TODO upgrade to lvgl8 lv_obj_clear_protect(buttonAdd, LV_PROTECT_FOLLOW);
   lv_big_button_create(scr, "F:/bmp_out.bin", extrude_menu.out, BTN_X_PIXEL * 3 + INTERVAL_V * 4, titleHeight, event_handler, ID_E_DEC);
 
   buttonType = lv_imgbtn_create(scr, nullptr, INTERVAL_V, BTN_Y_PIXEL + INTERVAL_H + titleHeight, event_handler, ID_E_TYPE);
@@ -142,11 +141,11 @@ void lv_draw_extrusion() {
   disp_ext_speed();
 
   tempText = lv_label_create_empty(scr);
-  lv_obj_set_style(tempText, &tft_style_label_rel);
+  lv_obj_add_style(tempText,&tft_style_label_rel,0);
   disp_hotend_temp();
 
   ExtruText = lv_label_create_empty(scr);
-  lv_obj_set_style(ExtruText, &tft_style_label_rel);
+  lv_obj_add_style(ExtruText,&tft_style_label_rel,0);
   disp_extru_amount();
 }
 
@@ -160,7 +159,7 @@ void disp_ext_type() {
     if (gCfgItems.multiple_language) lv_label_set_text(labelType, extrude_menu.ext1);
   }
   if (gCfgItems.multiple_language)
-    lv_obj_align(labelType, buttonType, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(labelType, buttonType, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
 }
 
 void disp_ext_speed() {
@@ -176,7 +175,7 @@ void disp_ext_speed() {
       case uiCfg.eSpeedL: lv_label_set_text(labelSpeed, extrude_menu.low);    break;
       case uiCfg.eSpeedN: lv_label_set_text(labelSpeed, extrude_menu.normal); break;
     }
-    lv_obj_align(labelSpeed, buttonSpeed, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(labelSpeed, buttonSpeed, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
   }
 }
 
@@ -186,7 +185,7 @@ void disp_hotend_temp() {
   strcpy(public_buf_l, extrude_menu.temper_text);
   strcat(public_buf_l, buf);
   lv_label_set_text(tempText, public_buf_l);
-  lv_obj_align(tempText, nullptr, LV_ALIGN_CENTER, 0, -50);
+  lv_obj_align_to(tempText, nullptr, LV_ALIGN_CENTER, 0, -50);
 }
 
 void disp_extru_amount() {
@@ -204,7 +203,7 @@ void disp_extru_amount() {
   strcat(public_buf_l, buf1);
 
   lv_label_set_text(ExtruText, public_buf_l);
-  lv_obj_align(ExtruText, nullptr, LV_ALIGN_CENTER, 0, -75);
+  lv_obj_align_to(ExtruText, nullptr, LV_ALIGN_CENTER, 0, -75);
 }
 
 void disp_ext_step() {
@@ -223,7 +222,7 @@ void disp_ext_step() {
       case uiCfg.eStepMed: lv_label_set_text(labelStep, buf3); break;
       case uiCfg.eStepMax: lv_label_set_text(labelStep, buf3); break;
     }
-    lv_obj_align(labelStep, buttonStep, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(labelStep, buttonStep, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
   }
 }
 

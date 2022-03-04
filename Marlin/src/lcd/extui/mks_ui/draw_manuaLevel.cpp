@@ -25,7 +25,6 @@
 #if HAS_TFT_LVGL_UI
 
 #include "draw_ui.h"
-#include <lv_conf.h>
 
 #include "../../../gcode/queue.h"
 #include "../../../inc/MarlinConfig.h"
@@ -44,17 +43,17 @@ enum {
   ID_MANUAL_RETURN
 };
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
 
-  switch (obj->mks_obj_id) {
+  switch (mks_data(event).mks_obj_id) {
     case ID_M_POINT1 ... ID_M_POINT5:
       if (queue.ring_buffer.empty()) {
         if (uiCfg.leveling_first_time) {
           uiCfg.leveling_first_time = false;
           queue.inject_P(G28_STR);
         }
-        const int ind = obj->mks_obj_id - ID_M_POINT1;
+        const int ind = mks_data(event).mks_obj_id - ID_M_POINT1;
         sprintf_P(public_buf_l, PSTR("G1Z10\nG1X%dY%d\nG1Z0"), gCfgItems.trammingPos[ind].x, gCfgItems.trammingPos[ind].y);
         queue.inject(public_buf_l);
       }
@@ -70,7 +69,7 @@ void lv_draw_manualLevel() {
   scr = lv_screen_create(LEVELING_UI);
   // Create an Image button
   lv_obj_t *buttonPoint1 = lv_big_button_create(scr, "F:/bmp_leveling1.bin", leveling_menu.position1, INTERVAL_V, titleHeight, event_handler, ID_M_POINT1);
-  lv_obj_clear_protect(buttonPoint1, LV_PROTECT_FOLLOW);
+  //TODO upgrade to lvgl8 lv_obj_clear_protect(buttonPoint1, LV_PROTECT_FOLLOW);
   lv_big_button_create(scr, "F:/bmp_leveling2.bin", leveling_menu.position2, BTN_X_PIXEL + INTERVAL_V * 2, titleHeight, event_handler, ID_M_POINT2);
   lv_big_button_create(scr, "F:/bmp_leveling3.bin", leveling_menu.position3, BTN_X_PIXEL * 2 + INTERVAL_V * 3, titleHeight, event_handler, ID_M_POINT3);
   lv_big_button_create(scr, "F:/bmp_leveling4.bin", leveling_menu.position4, BTN_X_PIXEL * 3 + INTERVAL_V * 4, titleHeight, event_handler, ID_M_POINT4);

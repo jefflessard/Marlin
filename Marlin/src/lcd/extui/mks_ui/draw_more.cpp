@@ -57,9 +57,9 @@ enum {
   ID_M_RETURN,
 };
 
-static void event_handler(lv_obj_t * obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  switch (obj->mks_obj_id) {
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  switch (mks_data(event).mks_obj_id) {
     case ID_GCODE: lv_clear_more(); lv_draw_gcode(true); break;
     #if HAS_USER_ITEM(1)
       case ID_CUSTOM_1: queue.inject(F(MAIN_MENU_ITEM_1_GCODE)); break;
@@ -137,34 +137,34 @@ void lv_draw_more() {
 
   if (gCfgItems.multiple_language != 0) {
     lv_label_set_text(labelGCode, more_menu.gcode);
-    lv_obj_align(labelGCode, buttonGCode, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(labelGCode, buttonGCode, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
 
     #if HAS_USER_ITEM(1)
       lv_label_set_text(labelCustom1, more_menu.custom1);
-      lv_obj_align(labelCustom1, buttonCustom1, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelCustom1, buttonCustom1, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     #endif
     #if HAS_USER_ITEM(2)
       lv_label_set_text(labelCustom2, more_menu.custom2);
-      lv_obj_align(labelCustom2, buttonCustom2, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelCustom2, buttonCustom2, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     #endif
     #if HAS_USER_ITEM(3)
       lv_label_set_text(labelCustom3, more_menu.custom3);
-      lv_obj_align(labelCustom3, buttonCustom3, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelCustom3, buttonCustom3, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     #endif
     #if HAS_USER_ITEM(4)
       lv_label_set_text(labelCustom4, more_menu.custom4);
-      lv_obj_align(labelCustom4, buttonCustom4, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelCustom4, buttonCustom4, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     #endif
     #if HAS_USER_ITEM(5)
       lv_label_set_text(labelCustom5, more_menu.custom5);
-      lv_obj_align(labelCustom5, buttonCustom5, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelCustom5, buttonCustom5, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     #endif
     #if HAS_USER_ITEM(6)
       lv_label_set_text(labelCustom6, more_menu.custom6);
-      lv_obj_align(labelCustom6, buttonCustom6, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+      lv_obj_align_to(labelCustom6, buttonCustom6, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
     #endif
     lv_label_set_text(label_Back, common_menu.text_back);
-    lv_obj_align(label_Back, buttonBack, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
+    lv_obj_align_to(label_Back, buttonBack, LV_ALIGN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
   }
 
   #if BUTTONS_EXIST(EN1, EN2, ENC)

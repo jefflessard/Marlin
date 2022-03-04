@@ -24,7 +24,6 @@
 
 #if HAS_TFT_LVGL_UI
 
-#include <lv_conf.h>
 #include "tft_lvgl_configuration.h"
 
 #if ENABLED(MKS_WIFI_MODULE)
@@ -49,14 +48,14 @@ static lv_obj_t *labelPageText;
 #define ID_WL_RETURN 11
 #define ID_WL_DOWN   12
 
-static void event_handler(lv_obj_t *obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
 
-  if (obj->mks_obj_id == ID_WL_RETURN) {
+  if (mks_data(event).mks_obj_id == ID_WL_RETURN) {
     clear_cur_ui();
     lv_draw_set();
   }
-  else if (obj->mks_obj_id == ID_WL_DOWN) {
+  else if (mks_data(event).mks_obj_id == ID_WL_DOWN) {
     if (wifi_list.getNameNum > 0) {
       if ((wifi_list.nameIndex + NUMBER_OF_PAGE) >= wifi_list.getNameNum) {
         wifi_list.nameIndex = 0;
@@ -71,7 +70,7 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
   }
   else {
     for (uint8_t i = 0; i < NUMBER_OF_PAGE; i++) {
-      if (obj->mks_obj_id == i + 1) {
+      if (mks_data(event).mks_obj_id == i + 1) {
         if (wifi_list.getNameNum != 0) {
           const bool do_wifi = wifi_link_state == WIFI_CONNECTED && strcmp((const char *)wifi_list.wifiConnectedName, (const char *)wifi_list.wifiName[wifi_list.nameIndex + i]) == 0;
           wifi_list.nameIndex += i;
@@ -108,7 +107,7 @@ void lv_draw_wifi_list() {
   }
 
   labelPageText = lv_label_create_empty(scr);
-  lv_obj_set_style(labelPageText, &tft_style_label_rel);
+  lv_obj_add_style(labelPageText,&tft_style_label_rel,0);
 
   wifi_list.nameIndex = 0;
   wifi_list.currentWifipage = 1;
@@ -137,7 +136,7 @@ void disp_wifi_list() {
 
   sprintf((char *)tmpStr, list_menu.file_pages, wifi_list.currentWifipage, wifi_list.getPage);
   lv_label_set_text(labelPageText, (const char *)tmpStr);
-  lv_obj_align(labelPageText, nullptr, LV_ALIGN_CENTER, 50, -100);
+  lv_obj_align_to(labelPageText, nullptr, LV_ALIGN_CENTER, 50, -100);
 
   for (i = 0; i < NUMBER_OF_PAGE; i++) {
     ZERO(tmpStr);
@@ -145,14 +144,14 @@ void disp_wifi_list() {
     j = wifi_list.nameIndex + i;
     if (j >= wifi_list.getNameNum) {
       lv_label_set_text(labelWifiText[i], (const char *)tmpStr);
-      lv_obj_align(labelWifiText[i], buttonWifiN[i], LV_ALIGN_IN_LEFT_MID, 20, 0);
+      lv_obj_align_to(labelWifiText[i], buttonWifiN[i], LV_ALIGN_LEFT_MID, 20, 0);
     }
     else {
       lv_label_set_text(labelWifiText[i], (char const *)wifi_list.wifiName[j]);
-      lv_obj_align(labelWifiText[i], buttonWifiN[i], LV_ALIGN_IN_LEFT_MID, 20, 0);
+      lv_obj_align_to(labelWifiText[i], buttonWifiN[i], LV_ALIGN_LEFT_MID, 20, 0);
 
       const bool btext = (wifi_link_state == WIFI_CONNECTED && strcmp((const char *)wifi_list.wifiConnectedName, (const char *)wifi_list.wifiName[j]) == 0);
-      lv_btn_set_style(buttonWifiN[i], LV_BTN_STYLE_REL, btext ? &style_sel_text : &tft_style_label_rel);
+      lv_obj_add_style(buttonWifiN[i], btext ? &style_sel_text : &tft_style_label_rel, 0);
     }
   }
 }

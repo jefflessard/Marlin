@@ -45,9 +45,9 @@ static uint8_t id_mark        = 0;
 #define ID_CLOUD_BIND_OR_NOT  2
 #define ID_CLOUD_RELEASE_BIND 3
 
-static void event_handler(lv_obj_t * obj, lv_event_t event) {
-  if (event != LV_EVENT_RELEASED) return;
-  switch (obj->mks_obj_id) {
+static void event_handler(lv_event_t *event) {
+  if (lv_event_get_code(event) != LV_EVENT_RELEASED) return;
+  switch (mks_data(event).mks_obj_id) {
     case ID_CLOUD_BIND_RETURN:
       goto_previous_ui();
       break;
@@ -64,31 +64,31 @@ void lv_draw_cloud_bind() {
   lv_obj_t *buttonBack = nullptr, *label_Back = nullptr;
   scr = lv_screen_create(BIND_UI);
 
-  button_bind_or_not = lv_btn_create(scr, nullptr);
+  button_bind_or_not = lv_btn_create(scr);
   lv_obj_set_pos(button_bind_or_not, TFT_WIDTH - 130, TFT_HEIGHT - 80 * 3);
   lv_obj_set_size(button_bind_or_not, PARA_UI_VALUE_BTN_X_SIZE + 15, PARA_UI_VALUE_BTN_Y_SIZE + 15);
   lv_obj_set_event_cb_mks(button_bind_or_not, event_handler, ID_CLOUD_BIND_OR_NOT, nullptr, 0);
-  lv_btn_set_style(button_bind_or_not, LV_BTN_STYLE_REL, &style_para_value);
-  lv_btn_set_style(button_bind_or_not, LV_BTN_STYLE_PR, &style_para_value);
+  lv_obj_add_style(button_bind_or_not, &style_para_value, 0);
+  lv_obj_add_style(button_bind_or_not, &style_para_value, LV_STATE_PRESSED);
   label_bind_or_not = lv_label_create_empty(button_bind_or_not);
 
-  buttonReleaseBind = lv_btn_create(scr, nullptr);
+  buttonReleaseBind = lv_btn_create(scr);
   lv_obj_set_pos(buttonReleaseBind, TFT_WIDTH - 130, TFT_HEIGHT - 80 * 2);
   lv_obj_set_size(buttonReleaseBind, PARA_UI_VALUE_BTN_X_SIZE + 15, PARA_UI_VALUE_BTN_Y_SIZE + 15);
   lv_obj_set_event_cb_mks(buttonReleaseBind, event_handler, ID_CLOUD_RELEASE_BIND, nullptr, 0);
   label_ReleaseBind = lv_label_create_empty(buttonReleaseBind);
   lv_label_set_text(label_ReleaseBind, cloud_menu.unbind);
-  lv_obj_align(label_ReleaseBind, buttonReleaseBind, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_align_to(label_ReleaseBind, buttonReleaseBind, LV_ALIGN_CENTER, 0, 0);
 
-  buttonBack = lv_btn_create(scr, nullptr);
+  buttonBack = lv_btn_create(scr);
   lv_obj_set_pos(buttonBack, TFT_WIDTH - 130, TFT_HEIGHT - 80);
   lv_obj_set_size(buttonBack, PARA_UI_VALUE_BTN_X_SIZE + 15, PARA_UI_VALUE_BTN_Y_SIZE + 15);
   lv_obj_set_event_cb_mks(buttonBack, event_handler, ID_CLOUD_BIND_RETURN, nullptr, 0);
-  lv_btn_set_style(buttonBack, LV_BTN_STYLE_REL, &style_para_back);
-  lv_btn_set_style(buttonBack, LV_BTN_STYLE_PR, &style_para_back);
+  lv_obj_add_style(buttonBack, &style_para_back, 0);
+  lv_obj_add_style(buttonBack, &style_para_back, LV_STATE_PRESSED);
   label_Back = lv_label_create_empty(buttonBack);
   lv_label_set_text(label_Back, common_menu.text_back);
-  lv_obj_align(label_Back, buttonBack, LV_ALIGN_CENTER, 0, 0);
+  lv_obj_align_to(label_Back, buttonBack, LV_ALIGN_CENTER, 0, 0);
 
   #if BUTTONS_EXIST(EN1, EN2, ENC)
     if (gCfgItems.encoder_enable) {
@@ -99,7 +99,7 @@ void lv_draw_cloud_bind() {
 
   text_id = lv_label_create_empty(scr);
   lv_obj_set_pos(text_id, 50, 60 + 200 + 20);
-  lv_obj_set_style(text_id, &tft_style_label_rel);
+  lv_obj_add_style(text_id,&tft_style_label_rel,0);
   lv_label_set_text(text_id, (char *)cloud_para.id);
 
   id_mark = 0;
@@ -113,36 +113,36 @@ void disp_bind_state() {
 
   if (unbinding_flag) {
     lv_label_set_text(label_bind_or_not, cloud_menu.unbinding);
-    lv_obj_align(label_bind_or_not, button_bind_or_not, LV_ALIGN_CENTER, 0, 0);
-    lv_btn_set_style(buttonReleaseBind, LV_BTN_STYLE_REL, &style_para_value);
-    lv_btn_set_style(buttonReleaseBind, LV_BTN_STYLE_PR, &style_para_value);
+    lv_obj_align_to(label_bind_or_not, button_bind_or_not, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_add_style(buttonReleaseBind, &style_para_value, 0);
+    lv_obj_add_style(buttonReleaseBind, &style_para_value, LV_STATE_PRESSED);
   }
   else {
     if (cloud_para.state == 0x10) {
       lv_label_set_text(label_bind_or_not, cloud_menu.disconnected);
-      lv_obj_align(label_bind_or_not, button_bind_or_not, LV_ALIGN_CENTER, 0, 0);
+      lv_obj_align_to(label_bind_or_not, button_bind_or_not, LV_ALIGN_CENTER, 0, 0);
     }
     else if (cloud_para.state == 0x11) {
       lv_label_set_text(label_bind_or_not, cloud_menu.unbinded);
-      lv_obj_align(label_bind_or_not, button_bind_or_not, LV_ALIGN_CENTER, 0, 0);
+      lv_obj_align_to(label_bind_or_not, button_bind_or_not, LV_ALIGN_CENTER, 0, 0);
     }
     else if (cloud_para.state == 0x12) {
       lv_label_set_text(label_bind_or_not, cloud_menu.binded);
-      lv_obj_align(label_bind_or_not, button_bind_or_not, LV_ALIGN_CENTER, 0, 0);
+      lv_obj_align_to(label_bind_or_not, button_bind_or_not, LV_ALIGN_CENTER, 0, 0);
     }
     else {
       lv_label_set_text(label_bind_or_not, cloud_menu.disable);
-      lv_obj_align(label_bind_or_not, button_bind_or_not, LV_ALIGN_CENTER, 0, 0);
+      lv_obj_align_to(label_bind_or_not, button_bind_or_not, LV_ALIGN_CENTER, 0, 0);
     }
   }
 
   if (cloud_para.state == 0x12 && !unbinding_flag) {
-    lv_btn_set_style(buttonReleaseBind, LV_BTN_STYLE_REL, &style_para_back);
-    lv_btn_set_style(buttonReleaseBind, LV_BTN_STYLE_PR, &style_para_back);
+    lv_obj_add_style(buttonReleaseBind, &style_para_back, 0);
+    lv_obj_add_style(buttonReleaseBind, &style_para_back, LV_STATE_PRESSED);
   }
   else {
-    lv_btn_set_style(buttonReleaseBind, LV_BTN_STYLE_REL, &style_para_value);
-    lv_btn_set_style(buttonReleaseBind, LV_BTN_STYLE_PR, &style_para_value);
+    lv_obj_add_style(buttonReleaseBind, &style_para_value, 0);
+    lv_obj_add_style(buttonReleaseBind, &style_para_value, LV_STATE_PRESSED);
   }
 }
 
