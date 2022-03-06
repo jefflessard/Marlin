@@ -2692,9 +2692,9 @@
  * TMCStepper library is required to use TMC stepper drivers.
  * https://github.com/teemuatlut/TMCStepper
  */
+#define E0_SERIAL_TX_PIN PA2
+#define E0_SERIAL_RX_PIN PA2
 #if HAS_TRINAMIC_CONFIG
-  #define E0_SERIAL_TX_PIN PA2
-  #define E0_SERIAL_RX_PIN PA2
   #define TMC_BAUD_RATE  19200
 
   #define HOLD_MULTIPLIER    0.5  // Scales down the holding current from run current
